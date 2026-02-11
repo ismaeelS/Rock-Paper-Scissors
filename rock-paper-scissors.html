@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+
+        <meta name="description" content="Play Rock, Paper, Scissors between you and the computer. You have the option to select and random move and to autoplay the game.">
+        <meta name="author" content="">
+
+        <meta name="googlebot-news" content="index, follow, max-snippet:-1">
+        <meta property="og:title" content="Rock Paper Scissors Single Player Game"/>
+        <meta property="og:description" content="Play Rock, Paper, Scissors between you and the computer. You have the option to select and random move and to autoplay the game."/>
+
+
+        <div class="js-gear-icon gear-icon">&#9881;</div>
         <title>Rock Paper Scissors</title>
         <link rel="stylesheet" href="rock-paper-scissors.css">
     </head>
@@ -21,13 +32,15 @@
             <p class="js-round-result"></p>
         </div>
 
-        <p class="js-scoreboard scoreboard"></p>
+        <div class="score-text">
+            <p class="js-scoreboard scoreboard"></p>
+            <p class="js-win-rate"></p>
+        </div>
 
         <div>
             <button class="js-reset-score-btn reset-btn">Reset Score</button>
         </div>
 
-        <script src="data/selectors-and-eventListeners.js"></script>
         <script src="rock-paper-scisssors.js"></script>
     </body>
 </html>

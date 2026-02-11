@@ -17,6 +17,15 @@ button {
     cursor: pointer;
 }
 
+.gear-icon {
+    position: fixed;
+    top: 0;
+    right: 1rem;
+
+    font-size: 6rem;
+    cursor: pointer;
+}
+
 .page-title {
     margin-top: .5rem;
     margin-bottom: 4rem;
@@ -84,7 +93,7 @@ button {
     background-color: #696969;
 }
 
-.results-text, .scoreboard {
+.results-text, .score-text {
     font-size: 1.5rem;
 }
 

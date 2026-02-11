@@ -1,63 +1,139 @@
+// import score from localStorage if available or initialize a score starting at 0-0-0
 const score = JSON.parse(localStorage.getItem("score")) || {
     wins: 0,
     losses: 0,
     ties: 0,
 }
 
+const settings = {
+    'autoPlayInterval': 2000,
+}
+
 let autoplaying = false;
 let intervalId;
 
-const buttons = {
-    "rock":rockBtn,
-    "paper":paperBtn,
-    "scissors":scissorsBtn
+const settingsIcon = document.querySelector(".js-gear-icon");
+
+const pageTitle = document.querySelector(".js-page-title");
+const resultsParagraph = document.querySelector(".js-results-text");
+const winRateParagraph = document.querySelector(".js-win-rate");
+
+const rockBtn = document.querySelector('.js-rock-btn');
+const paperBtn = document.querySelector('.js-paper-btn');
+const scissorsBtn = document.querySelector('.js-scissors-btn');
+const randomBtn = document.querySelector('.js-random-btn');
+const autoplayBtn = document.querySelector('.js-autoplay-btn');
+const resetScoreBtn = document.querySelector(".js-reset-score-btn");
+
+settingsIcon.addEventListener("click", () => {if(!autoplaying) editSettings()});
+
+//replace below by iterating thru buttons and using data-my-variable-name in html and myObject.dataset.myVariableName HALP
+rockBtn.addEventListener("click", () => {if(!autoplaying) playOneRound("rock")});
+paperBtn.addEventListener("click", () => {if(!autoplaying) playOneRound("paper")});
+scissorsBtn.addEventListener("click", () => {if(!autoplaying) playOneRound("scissors")});
+
+randomBtn.addEventListener("click", () => {if(!autoplaying) playOneRound(chooseRandomWeapon())});
+
+autoplayBtn.addEventListener("click", () => autoplayGame());
+resetScoreBtn.addEventListener("click", () => resetScore());
+
+document.addEventListener("keyup", function(event) {
+    const keyPressed = event.key.toLowerCase();
+
+    if (keyPressed === 'r' || keyPressed === 'arrowleft') {
+        if(!autoplaying) playOneRound("rock");
+    }
+    else if (keyPressed === 'p' || keyPressed === 'arrowup') {
+        if(!autoplaying) playOneRound("paper");
+    }
+    else if (keyPressed === 's' || keyPressed === 'arrowright') {
+        if(!autoplaying) playOneRound("scissors");
+    }
+    else if (keyPressed === 'x' || keyPressed === 'arrowdown') {
+        if(!autoplaying) playOneRound(chooseRandomWeapon());
+    }
+    else if (keyPressed === 'a') {
+        autoplayGame();
+    }
+    else if (keyPressed === 'backspace') {
+        resetScore();
+    }
+});
+
+const weapons = {
+    "rock": {
+        "button": rockBtn,
+        "beats": ["scissors"]
+    },
+    "paper": {
+        "button": paperBtn,
+        "beats": ["rock"]
+    },
+    "scissors": {
+        "button": scissorsBtn,
+        "beats": ["paper"]
+    },
 }
 
 updateScoreboard();
 
 /**
- * @returns {string} Randomly chooses a move from rock, paper, or scissors
+ * @returns {string} Randomly generates a number and compares it to the index of each weapon to determine a weapon
  */
-function chooseMove() {
-    const move = Math.random();
+function chooseRandomWeapon() {
+    const chosenWeaponAtRandom = Math.random();
+    const possibleWeapons = Object.keys(weapons);
 
-    if (move < (1/3)) {
-        return "rock";
+    for (let i = 0; i < possibleWeapons.length; i++) {
+        if (chosenWeaponAtRandom < (i+1)/(possibleWeapons.length)) {
+            return possibleWeapons[i];
+        }
     }
-    else if (move < (2/3)) {
-        return "paper"
-    }
-
-    return "scissors";
 }
 
 /**
- * Load in localStorage data or initialize with 0's
+ * Update the webelements with the current scores and set the win rate text color to match success this game
  */
 function updateScoreboard() {
     document.querySelector(".js-scoreboard").innerHTML =
     `Your record is
     ${score.wins} win${score.wins === 1?'':'s'}, 
     ${score.losses} loss${score.losses === 1?'':'es'}, and 
-    ${score.ties} tie${score.ties === 1?'':'s'}`;
+    ${score.ties} tie${score.ties === 1?'':'s'}`
+
+    const roundsPlayed = score.wins+score.ties+score.losses;
+    const winRate = score.wins/roundsPlayed;
+
+    winRateParagraph.innerHTML = (roundsPlayed) ?
+    `You have played ${roundsPlayed} round${roundsPlayed === 1?'':'s'} and your win rate is ${(winRate*100).toFixed(2)}%` : "";
+
+    if (!roundsPlayed || winRate === 1/3) {
+        winRateParagraph.classList.remove("turn-text-green");
+        winRateParagraph.classList.remove("turn-text-red");
+    }
+    else {
+        winRateParagraph.classList.add(`turn-text-${winRate > (1/3) ? 'green': 'red'}`);
+    }
 }
 
 function autoplayGame() {
     if (!autoplaying) {
-        intervalId = setInterval(() => {
-            const bothMoves = playGame(chooseMove());
+        if (confirm("While autoplaying, you will no longer be able to select your moves or access the settings. Do you want to start?")) {
+            intervalId = setInterval(() => {
+            const bothWeapons = playOneRound(chooseRandomWeapon());
 
-            //show the move's background when it's picked during autoplay 
-            bothMoves.forEach(move => {
-                buttons[move].classList.add(`${move}-bg`);
+            //show the weapon's background when it's picked during autoplay 
+            bothWeapons.forEach(weapon => {
+                weapons[weapon]["button"].classList.add(`${weapon}-bg`);
             });
-        }, 2000);
+        }, settings.autoPlayInterval);
 
         autoplaying = true;
+        }
     }
     else {
         if (confirm("Stop autoplaying?")) {
-            resetColors(true);
+            resetColors(false);
 
             clearInterval(intervalId);
             autoplaying = false;
@@ -65,40 +141,36 @@ function autoplayGame() {
     }
 }
 
-function playGame(selectedMove) {
-    const computerMove = chooseMove()
+function playOneRound(selectedPlayerWeapon) {
+    const computerWeapon = chooseRandomWeapon()
 
     let roundResultMessage = "";
 
-    resetColors(false);
-
-    if (selectedMove === computerMove) {
+    resetColors(true);
+    
+    if (selectedPlayerWeapon === computerWeapon) {
         roundResultMessage = "You Tie"
         score.ties++;
     }
-    else if (
-        (selectedMove === "rock" && computerMove === "scissors") ||
-        (selectedMove === "paper" && computerMove === "rock") ||
-        (selectedMove === "scissors" && computerMove === "paper")
-    ) {
+    else if (weapons[selectedPlayerWeapon]["beats"].includes(computerWeapon)) {
         roundResultMessage = "You Win"
         score.wins++;
         
         pageTitle.classList.add("turn-text-green");
-        resultsParagraphs.classList.add("turn-text-green");
-        buttons[selectedMove].classList.add("turn-border-green");
+        resultsParagraph.classList.add("turn-text-green");
+        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-green");
     }
     else {
         roundResultMessage = "You Lose"
         score.losses++;
         
         pageTitle.classList.add("turn-text-red");
-        resultsParagraphs.classList.add("turn-text-red");
-        buttons[selectedMove].classList.add("turn-border-red");
+        resultsParagraph.classList.add("turn-text-red");
+        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-red");   
     }
 
     document.querySelector(".js-round-picks").innerHTML = 
-        `You played ${selectedMove} and the computer played ${computerMove}`;
+        `You played ${selectedPlayerWeapon} and the computer played ${computerWeapon}`;
     
     document.querySelector(".js-round-result").innerHTML = roundResultMessage;
 
@@ -106,7 +178,7 @@ function playGame(selectedMove) {
 
     updateScoreboard();
 
-    return [selectedMove, computerMove];
+    return [selectedPlayerWeapon, computerWeapon];
 }
 
 /**
@@ -132,7 +204,7 @@ function resetScore() {
             autoplaying = false;
         }
 
-        resetColors(false);
+        resetColors(true);
 
         updateScoreboard();
     }
@@ -140,24 +212,46 @@ function resetScore() {
 
 /**
  * 
- * @param {boolean} onlyRemoveBackground
+ * @param {boolean} resetTitleAndButtonBorders
  * for each element, remove the css classes for border/text colors
  */
-function resetColors(onlyRemoveBackground) {
-    Object.keys(buttons).forEach(move => {
-        buttons[move].classList.remove(`${move}-bg`);
+function resetColors(resetTitleAndButtonBorders) {
+    Object.keys(weapons).forEach(weapon => {
+        weapons[weapon]["button"].classList.remove(`${weapon}-bg`);
     });
 
-    if (!onlyRemoveBackground) {
+    if (resetTitleAndButtonBorders) {
         ["green", "red"].forEach(color => {
             pageTitle.classList.remove(`turn-text-${color}`);
-            resultsParagraphs.classList.remove(`turn-text-${color}`);
+            resultsParagraph.classList.remove(`turn-text-${color}`);
+            winRateParagraph.classList.remove(`turn-text-${color}`);
         });
 
-        Object.keys(buttons).forEach(move => {
+        Object.keys(weapons).forEach(weapon => {
             ["green", "red"].forEach(color => {
-                buttons[move].classList.remove(`turn-border-${color}`);
+                weapons[weapon]["button"].classList.remove(`turn-border-${color}`);
             });
         });
+    }
+}
+
+// HALP this needs to open up an interactable dialog box
+function editSettings() {
+    console.log("In settings");
+    console.log(settings);
+
+    let settingToEdit = prompt("1 for interval");
+
+    switch (settingToEdit) {
+        case "1":
+            let newInterval = (Number(prompt("new interval?")));
+
+            if (newInterval > 0 && newInterval < 10) {
+                settings.autoPlayInterval = newInterval*1000;
+            }
+            break;
+    
+        default:
+            break;
     }
 }
