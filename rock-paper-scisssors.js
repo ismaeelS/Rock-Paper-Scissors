@@ -7,52 +7,51 @@ const score = JSON.parse(localStorage.getItem("score")) || {
 
 const settings = JSON.parse(localStorage.getItem("settings")) || {
     "autoPlayInterval": 2000,
-    "shortcuts": ["backspace", "a", "x"],
+    "shortcuts": ["?", "a", "x"],
 }
+
+let unsavedWeapons = JSON.parse(JSON.stringify(weapons));
+let unsavedSettings = JSON.parse(JSON.stringify(settings));
 
 let autoplaying = false;
 let intervalId;
+let settingsModalIsOpen = false;
 
 const pageTitle = document.querySelector(".js-page-title");
 const resultsParagraph = document.querySelector(".js-results-text");
 const winRateParagraph = document.querySelector(".js-win-rate");
 
-const weapons = {
-    "rock": {
-        "button": null,
-        "beats": ["scissors"],
-        "shortcut": "r",
-        "backgroundImage": "images/rock.jpg",
-    },
-    "paper": {
-        "button": null,
-        "beats": ["rock"],
-        "shortcut": "p",
-        "backgroundImage": "images/paper.jpg",
-    },
-    "scissors": {
-        "button": null,
-        "beats": ["paper"],
-        "shortcut": "s",
-        "backgroundImage": "images/scissors.jpg",
-    },
-}
+const settingsModal = document.querySelector(".modal-container");
+const buttonSettingsSection = document.querySelector(".button-settings");
 
 initializeDefaultGameState();
 
-// HALP GO THRU THE INITIAL WEAPONS OBJECT AND FROM IT, BUILD UP THE HTML AND THE SETTINGS OBJECT
+
+//  HALP find out online the scope of event listeners esp if they are being initialized within a function
 function initializeDefaultGameState() {
     generateDefaultWeaponsHTML();
 
-    //set up listeners for the settings icon, the autoplay button, and the reset button
-    document.querySelector(".js-gear-icon").addEventListener("click", () => {if(!autoplaying) editSettings()});
-    document.querySelector(".js-autoplay-btn").addEventListener("click", () => autoplayGame());
-    document.querySelector(".js-reset-score-btn").addEventListener("click", () => resetScore());
+    //set up listeners for the settings, the autoplay button, and the reset button
+    document.querySelector(".js-gear-icon").addEventListener("click", () => {if(!autoplaying) openSettingsModal();});
+    document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
+    document.querySelector(".modal-container").addEventListener("click", (e) => {
+        if (settingsModalIsOpen && e.target === (document.querySelector(".modal-container")))
+        closeSettingsModal();
+    });
+    // document.querySelector("body").addEventListener("click", (e) => {console.log(e.target); closeSettingsModal()});
+    document.querySelector(".js-settings-add-btn").addEventListener("click", () => {if(settingsModalIsOpen) addWeaponToSettings();});
+    //HALP IMPLEMENT THE BELOW
+    document.querySelector(".js-settings-reset-btn").addEventListener("click", () => {if(settingsModalIsOpen) resetSettingsChanges();});
+    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {if(settingsModalIsOpen) restoreDefaultSettings()});
+    document.querySelector(".submit-btn").addEventListener("click", () => {if(settingsModalIsOpen) submitNewSettings()});
+
+    document.querySelector(".js-autoplay-btn").addEventListener("click", () => {if(!settingsModalIsOpen)autoplayGame();});
+    document.querySelector(".js-reset-score-btn").addEventListener("click", () => {if(!settingsModalIsOpen)resetScore();});
 
     //set up event listeners for the random button
     let randomButton = document.querySelector(".js-random-btn");
     randomButton.addEventListener("click", () => {if(!autoplaying) playOneRound(chooseRandomWeapon())});
-    randomButton.addEventListener("mouseover", () => {if(!autoplaying) 
+    randomButton.addEventListener("mouseover", () => {if(!autoplaying)
         randomButton.style.backgroundImage = `url("images/random.jpg")`;
     });
     randomButton.addEventListener("mouseout", () => {randomButton.style.backgroundImage = ``;});
@@ -75,39 +74,42 @@ function initializeDefaultGameState() {
         });
 
         //add the weapon shortcut to the settings object
-        settings["shortcuts"].push(weapons[weapon]["shortcut"]);
+        if (!settings["shortcuts"].includes(weapons[weapon]["shortcut"]))
+            settings["shortcuts"].push(weapons[weapon]["shortcut"]);
     });
 
-    //add support to playing with the keyboard
     document.addEventListener("keyup", function(event) {
         const keyPressed = event.key.toLowerCase();
 
-        console.log(keyPressed);
-
-        if (keyPressed === "backspace") {
-            resetScore();
-        }
-        else if (keyPressed === "a") {
-            autoplayGame();
-        }
-        else if (autoplaying || !settings["shortcuts"].includes(keyPressed)) {
-            ;
-        }
-        else if (keyPressed === "x") {
-            playOneRound(chooseRandomWeapon());
-        }
-        //if the pressed key is recognized by the settings object as a valid shortcut, play the weapon
-        else {
-            Object.keys(weapons).forEach(weapon => {
-                if (weapons[weapon]["shortcut"] === keyPressed) {
-                    playOneRound(weapon);
-                }
-            });
-        }
-        
+        if (!settingsModalIsOpen) {
+            if (keyPressed === "?") {
+                playOneRound(chooseRandomWeapon());
+            }
+            else if (keyPressed === "a") {
+                autoplayGame();
+            }
+            else if (autoplaying || !settings["shortcuts"].includes(keyPressed)) {
+                ;
+            }
+            else if (keyPressed === "x") {
+                resetScore();
+            }
+            //if the pressed key is recognized by the settings object as a valid shortcut, play the weapon
+            else {
+                Object.keys(weapons).forEach(weapon => {
+                    if (weapons[weapon]["shortcut"] === keyPressed) {
+                        playOneRound(weapon);
+                    }
+                });
+            }
+        } 
     });
 
+    unsavedWeapons = JSON.parse(JSON.stringify(weapons));
+    unsavedSettings = JSON.parse(JSON.stringify(settings));
+
     updateScoreboard();
+    updateSettingsForm();
 }
 
 /**
@@ -136,6 +138,113 @@ function updateScoreboard() {
 }
 
 /**
+ * set up placeholders, etc (unneccessary if using a framework)
+ * HALP update this description
+ */
+function updateSettingsForm() {
+    document.querySelector("#autoplay-interval").placeholder = (settings.autoPlayInterval)/1000;
+ 
+    let buttonSettingsSectionHTML = buttonSettingsSection.innerHTML;
+
+    Object.keys(weapons).forEach(weapon => {
+        buttonSettingsSectionHTML += 
+        `<div data-${weapon}-div>
+            <label for="${weapon}-name">Name</label>
+            <input type="text" name="${weapon}-name" id="${weapon}-name" class="weapon-name-input" value="${weapon}" required>
+            <label for="${weapon}-shortcut">Shortcut</label>
+            <input type="text" name="${weapon}-shortcut" id="${weapon}-shortcut" value="${weapons[weapon]["shortcut"]}" maxlength="1" required>
+            
+            <label for="${weapon}-beats">Beats</label>
+            <select name="${weapon}-beats" id="${weapon}-beats" multiple required>
+                ${settingsOptionValuesHTML(weapon, "beats")}
+            </select>
+            
+            <label for="${weapon}-ties">Ties</label>
+            <select name="${weapon}-ties" id="${weapon}-ties" multiple>
+                ${settingsOptionValuesHTML(weapon, "ties")}
+            </select>
+            <button type="button" data-${weapon}-remove>Remove</button>
+        </div>`;
+    });
+
+    //HALP handle removing of divs based on which remove clicked
+
+    buttonSettingsSection.innerHTML = buttonSettingsSectionHTML;
+}
+
+//HALP HAVE AN INDICATOR THAT CHANGES HAVE BEEN MADE BUT NOT SAVED
+function addWeaponToSettings() {
+    console.log("adding weapon input");
+
+    let newWeaponName = prompt("Enter the new weapon's name");
+
+    console.log(newWeaponName);
+
+    if (newWeaponName) {
+        newWeaponName = newWeaponName.toLowerCase();
+
+        let newWeaponInput = document.createElement("div");
+
+        newWeaponInput.innerHTML = `<label for="${newWeaponName}-name">Name</label>
+                <input type="text" name="${newWeaponName}-name" id="${newWeaponName}-name" class="weapon-name-input" value="${newWeaponName}" required>
+                <label for="${newWeaponName}-shortcut">Shortcut</label>
+                <input type="text" name="${newWeaponName}-shortcut" id="${newWeaponName}-shortcut" value="" maxlength="1" required>
+                
+                <label for="${newWeaponName}-beats">Beats</label>
+                <select name="${newWeaponName}-beats" id="${newWeaponName}-beats" multiple required>
+                    <option value="${newWeaponName}">${newWeaponName}</option>
+                </select>
+                
+                <label for="${newWeaponName}-ties">Ties</label>
+                <select name="${newWeaponName}-ties" id="${newWeaponName}-ties" multiple>
+                    <option value="${newWeaponName}">${newWeaponName}</option>
+                </select>
+                <button type="button" data-${newWeaponName}-remove>Remove</button>`;
+
+        buttonSettingsSection.append(newWeaponInput);
+    }
+}
+
+function settingsOptionValuesHTML(chosenWeapon, comparison) {
+    let optionValuesHTML = "";
+
+    Object.keys(weapons).forEach(weapon => {
+        optionValuesHTML += `<option ${weapons[chosenWeapon][comparison].includes(weapon) ? "selected" : ""} value="${weapon}">${weapon}</option>`
+    });
+
+    return optionValuesHTML;
+}
+
+// HALP this needs to open up an interactable dialog box
+function openSettingsModal() {
+    settingsModalIsOpen = true;
+    settingsModal.style.visibility = 'visible';
+
+    //save the current settings in case the new settings are not valid
+    const savedSettings = JSON.parse(JSON.stringify(settings));
+
+    // go thru the selected options and then set settings
+
+    let rockdropdown = document.querySelector("#rock-beats").selectedOptions;
+
+    var values = Array.from(rockdropdown).map(({ value }) => value);
+    console.log(values);
+
+
+
+
+    let weaponsAreValid = checkIfWeaponsAreValid();
+
+    if (weaponsAreValid) {
+        localStorage.setItem("settings", JSON.stringify(settings));
+        console.log("weapons are fine");
+    }
+    else {
+        console.log("weapons are not fine");
+    }
+}
+
+/**
  * @returns {string} Randomly generates a number and compares it to the index of each weapon to determine a weapon
  */
 function chooseRandomWeapon() {
@@ -153,21 +262,27 @@ function autoplayGame() {
     if (!autoplaying) {
         if (confirm("While autoplaying, you will no longer be able to select your moves or access the settings. Do you want to start?")) {
             intervalId = setInterval(() => {
-            const bothWeapons = playOneRound(chooseRandomWeapon());
+                Object.keys(weapons).forEach(weapon => {
+                    weapons[weapon]["button"].style.backgroundImage = "";
+                });
 
-            //show the weapon background when it is picked during autoplay 
-            bothWeapons.forEach(weapon => {
-                weapons[weapon]["button"].style.backgroundImage = `url(${weapons[weapon]["backgroundImage"]})`;
-            });
-        }, settings.autoPlayInterval);
+                const bothWeapons = playOneRound(chooseRandomWeapon());
+
+                //show the weapon background when it is picked during autoplay 
+                bothWeapons.forEach(weapon => {
+                    weapons[weapon]["button"].style.backgroundImage = `url(${weapons[weapon]["backgroundImage"]})`;
+                });
+            }, settings.autoPlayInterval);
 
         autoplaying = true;
         }
     }
     else {
         if (confirm("Stop autoplaying?")) {
-            resetColors(false);
-
+            Object.keys(weapons).forEach(weapon => {
+                weapons[weapon]["button"].style.backgroundImage = "";
+            });
+            
             clearInterval(intervalId);
             autoplaying = false;
         }
@@ -175,43 +290,45 @@ function autoplayGame() {
 }
 
 function playOneRound(selectedPlayerWeapon) {
-    const computerWeapon = chooseRandomWeapon()
+    if (!settingsModalIsOpen) {
+        const computerWeapon = chooseRandomWeapon()
 
-    let roundResultMessage = "";
+        let roundResultMessage = "";
 
-    resetColors(true);
-    
-    if (selectedPlayerWeapon === computerWeapon) {
-        roundResultMessage = "You Tie"
-        score.ties++;
-    }
-    else if (weapons[selectedPlayerWeapon]["beats"].includes(computerWeapon)) {
-        roundResultMessage = "You Win"
-        score.wins++;
+        resetColors();
+
+        if (weapons[selectedPlayerWeapon]["ties"].includes(computerWeapon)) {
+            roundResultMessage = "You Tie"
+            score.ties++;
+        }
+        else if (weapons[selectedPlayerWeapon]["beats"].includes(computerWeapon)) {
+            roundResultMessage = "You Win"
+            score.wins++;
+            
+            pageTitle.classList.add("turn-text-green");
+            resultsParagraph.classList.add("turn-text-green");
+            weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-green");
+        }
+        else {
+            roundResultMessage = "You Lose"
+            score.losses++;
+            
+            pageTitle.classList.add("turn-text-red");
+            resultsParagraph.classList.add("turn-text-red");
+            weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-red");   
+        }
+
+        document.querySelector(".js-round-picks").innerHTML = 
+            `You played ${selectedPlayerWeapon} and the computer played ${computerWeapon}`;
         
-        pageTitle.classList.add("turn-text-green");
-        resultsParagraph.classList.add("turn-text-green");
-        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-green");
+        document.querySelector(".js-round-result").innerHTML = roundResultMessage;
+
+        localStorage.setItem("score", JSON.stringify(score));
+
+        updateScoreboard();
+
+        return [selectedPlayerWeapon, computerWeapon];
     }
-    else {
-        roundResultMessage = "You Lose"
-        score.losses++;
-        
-        pageTitle.classList.add("turn-text-red");
-        resultsParagraph.classList.add("turn-text-red");
-        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-red");   
-    }
-
-    document.querySelector(".js-round-picks").innerHTML = 
-        `You played ${selectedPlayerWeapon} and the computer played ${computerWeapon}`;
-    
-    document.querySelector(".js-round-result").innerHTML = roundResultMessage;
-
-    localStorage.setItem("score", JSON.stringify(score));
-
-    updateScoreboard();
-
-    return [selectedPlayerWeapon, computerWeapon];
 }
 
 /**
@@ -237,7 +354,7 @@ function resetScore() {
             autoplaying = false;
         }
 
-        resetColors(true);
+        resetColors();
 
         updateScoreboard();
     }
@@ -248,47 +365,73 @@ function resetScore() {
  * @param {boolean} resetTitleAndButtonBorders
  * for each element, remove the css classes for border/text colors
  */
-function resetColors(resetTitleAndButtonBorders) {
-    Object.keys(weapons).forEach(weapon => {
-        weapons[weapon]["button"].style.backgroundImage = "";
+function resetColors() {
+    ["green", "red"].forEach(color => {
+        pageTitle.classList.remove(`turn-text-${color}`);
+        resultsParagraph.classList.remove(`turn-text-${color}`);
+        winRateParagraph.classList.remove(`turn-text-${color}`);
     });
 
-    if (resetTitleAndButtonBorders) {
+    Object.keys(weapons).forEach(weapon => {
         ["green", "red"].forEach(color => {
-            pageTitle.classList.remove(`turn-text-${color}`);
-            resultsParagraph.classList.remove(`turn-text-${color}`);
-            winRateParagraph.classList.remove(`turn-text-${color}`);
+            weapons[weapon]["button"].classList.remove(`turn-border-${color}`);
         });
+    });
+}
 
-        Object.keys(weapons).forEach(weapon => {
-            ["green", "red"].forEach(color => {
-                weapons[weapon]["button"].classList.remove(`turn-border-${color}`);
-            });
-        });
+//HALP do some checks to make sure there isnt unsaved data by comparing savedSettings to settings
+function closeSettingsModal() {
+    settingsModalIsOpen = false;
+    settingsModal.style.visibility = 'hidden';
+}
+
+function checkIfWeaponsAreValid() {
+    for (let i = 0; i < Object.keys(weapons).length; i++) {
+        const firstWeapon = Object.keys(weapons)[i];
+
+        for (let j = i; j < Object.keys(weapons).length; j++) {
+            const secondWeapon = Object.keys(weapons)[j];
+
+            // return false if a weapon does not tie with itself
+            if (firstWeapon === secondWeapon && !weapons[firstWeapon]["ties"].includes(secondWeapon)) {
+                console.log("this weapon does not tie itself so the weapons are not valid");
+                return false;
+            }
+
+            // return false if a pair of weapons beat each other
+            if ((weapons[firstWeapon]["beats"].includes(secondWeapon) && weapons[secondWeapon]["beats"].includes(firstWeapon))) {
+                console.log("These two weapons beat each other so the weapons are not valid");
+                return false;
+            }
+
+            // return false if there is no comparison between this pair of weapons
+            if (!(weapons[firstWeapon]["beats"].includes(secondWeapon) || 
+            weapons[secondWeapon]["beats"].includes(firstWeapon) ||
+            weapons[firstWeapon]["ties"].includes(secondWeapon)
+            )) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
-// HALP this needs to open up an interactable dialog box
-function editSettings() {
-    console.log("In settings");
-    console.log(settings);
+function resetSettingsChanges() {
+    console.log("reset settings changes");
+}
 
-    let settingToEdit = prompt("1 for interval");
+function restoreDefaultSettings() {
+    console.log("restoring default settings");
+}
 
-    switch (settingToEdit) {
-        case "1":
-            let newInterval = (Number(prompt("new interval?")));
+function resetSettings() {
+    settings.autoPlayInterval = 2000;
+    settings.shortcuts = ["?", "a", "x"];
+}
 
-            if (newInterval > 0 && newInterval < 10) {
-                settings.autoPlayInterval = newInterval*1000;
-            }
-            break;
-    
-        default:
-            break;
-    }
-
-    localStorage.setItem("settings", JSON.stringify(settings));
+function submitNewSettings() {
+    console.log("submitted new settings");
 }
 
 function generateDefaultWeaponsHTML() {
@@ -301,4 +444,11 @@ function generateDefaultWeaponsHTML() {
     });
 
     arsenal.innerHTML = arsenalHTML;
+}
+
+// HALP figure out preloading images
+function preloadImage(url) {
+    let img = new Image();
+    console.log(img)
+    img.src = url;
 }

@@ -17,9 +17,9 @@ button {
     cursor: pointer;
 }
 
+/* settings css start */
+/* HALP add some transitions and transforms and maybe seperate this into own css file */
 .gear-icon {
-    display: none;
-    /* HALP remove above after implementing */
     position: fixed;
     top: 0;
     right: 1rem;
@@ -27,6 +27,72 @@ button {
     font-size: 6rem;
     cursor: pointer;
 }
+
+.modal-container {
+    position: fixed;
+    visibility: hidden;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: #1a1a1a;
+    opacity: .9;
+    border: .5rem solid wheat;
+}
+
+.modal {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background-color: wheat;
+    color: black;
+
+    border-radius: 1rem;
+    box-shadow: 2rem 2rem 2rem rgba(0, 0, 0, .9);
+
+    overflow: hidden;
+
+    max-width: 100%;
+}
+
+.modal h2 {
+    text-align: left;
+    margin-left: 1rem;
+}
+
+.modal-form div {
+    margin: 2rem 0rem;
+}
+
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    background: transparent;
+    
+    border: none;
+
+    font-size: 2rem;
+    color: black;
+}
+
+.button-settings {
+    overflow-y: auto;
+    max-height: 30rem;
+}
+
+option, .weapon-name-input {
+    text-transform: capitalize;
+}
+
+
+/* settings css end */
 
 .page-title {
     margin-top: .5rem;
@@ -55,16 +121,13 @@ button {
     background-color: transparent;
 
     font-size: 4rem;
+    text-transform: capitalize;
 
     vertical-align: top;
 
     margin-bottom: 3rem;
 
     background-size: cover;
-}
-
-.move-btn::first-letter {
-    text-transform: capitalize;
 }
 
 .autoplay-btn {

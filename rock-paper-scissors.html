@@ -1,22 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
 
-        <meta name="description" content="Play Rock, Paper, Scissors between you and the computer. You have the option to select and random move and to autoplay the game.">
+        <meta name="description" content="Play Rock, Paper, Scissors between you and the computer. You can add additional choices, select an option at random, and autoplay the game.">
         <meta name="author" content="">
 
         <meta name="googlebot-news" content="index, follow, max-snippet:-1">
         <meta property="og:title" content="Rock Paper Scissors Single Player Game"/>
-        <meta property="og:description" content="Play Rock, Paper, Scissors between you and the computer. You have the option to select and random move and to autoplay the game."/>
+        <meta property="og:description" content="Play Rock, Paper, Scissors between you and the computer. You can add additional choices, select an option at random, and autoplay the game."/>
 
         <title>Rock Paper Scissors</title>
         <link rel="stylesheet" href="rock-paper-scissors.css">
     </head>
     <body>
         <div class="js-gear-icon gear-icon">&#9881;</div>
-        <p class="js-page-title page-title">Rock Paper Scissors</p>
 
+        <section class="modal-container">
+            <section class="modal">
+                <div class="modal-content">
+                    <h1>Settings</h1>
+                    <button class="js-close-btn close-btn" id="close">X</button>
+                    <form class="modal-form">
+                        <h2>General</h2>
+                        <div>
+                            <label for="autoplay-interval">Autoplay Interval in Seconds</label>
+                            <input type="number" name="autoplay-interval" id="autoplay-interval" min="0" max="10" placeholder="">
+                        </div>
+                        <h2>Weapons</h2>
+                        <div class="button-settings"></div>
+                        <button type="button" class="js-settings-add-btn">Add</button>
+                        <button type="reset" class="js-settings-reset-btn">Reset</button>
+                        <button type="button" class="js-settings-restore-btn">Restore Default</button>
+                        <!-- <button type="button" class="submit-btn">Submit</button> -->
+                        <input type="submit" value="Submit" class="submit-btn">
+                    </form>
+                </div>
+            </section>
+        </section>
+
+        <p class="js-page-title page-title">Rock Paper Scissors+</p>
+
+        <!-- HALP NEED TO FIX LAYOUT OF THE CIRCLES TO LOOK BETTER -->
         <div class="js-button-holder button-holder">
             <button class="js-random-btn random-btn move-btn">random</button>
         </div>
@@ -37,6 +62,7 @@
             <button class="js-reset-score-btn reset-btn">Reset Score</button>
         </div>
 
+        <script src="data/weapons.js"></script>
         <script src="rock-paper-scisssors.js"></script>
     </body>
 </html>
