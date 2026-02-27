@@ -1,3 +1,40 @@
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.keep-rotating {
+    -webkit-animation: rotating 2s linear infinite;
+    -moz-animation: rotating 2s linear infinite;
+    -ms-animation: rotating 2s linear infinite;
+    -o-animation: rotating 2s linear infinite;
+    animation: rotating 2s linear infinite;
+}
+
 body {
     background-color: #1a1a1a;
     text-align: center;
@@ -17,8 +54,6 @@ button {
     cursor: pointer;
 }
 
-/* settings css start */
-/* HALP add some transitions and transforms and maybe seperate this into own css file */
 .gear-icon {
     position: fixed;
     top: 0;
@@ -28,71 +63,13 @@ button {
     cursor: pointer;
 }
 
-.modal-container {
-    position: fixed;
-    visibility: hidden;
-
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    background-color: #1a1a1a;
-    opacity: .9;
-    border: .5rem solid wheat;
+.gear-icon:hover {
+  -webkit-animation: rotating 2s linear infinite;
+  -moz-animation: rotating 2s linear infinite;
+  -ms-animation: rotating 2s linear infinite;
+  -o-animation: rotating 2s linear infinite;
+  animation: rotating 2s linear infinite;
 }
-
-.modal {
-    position: absolute;
-
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    background-color: wheat;
-    color: black;
-
-    border-radius: 1rem;
-    box-shadow: 2rem 2rem 2rem rgba(0, 0, 0, .9);
-
-    overflow: hidden;
-
-    max-width: 100%;
-}
-
-.modal h2 {
-    text-align: left;
-    margin-left: 1rem;
-}
-
-.modal-form div {
-    margin: 2rem 0rem;
-}
-
-.close-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-
-    background: transparent;
-    
-    border: none;
-
-    font-size: 2rem;
-    color: black;
-}
-
-.button-settings {
-    overflow-y: auto;
-    max-height: 30rem;
-}
-
-option, .weapon-name-input {
-    text-transform: capitalize;
-}
-
-
-/* settings css end */
 
 .page-title {
     margin-top: .5rem;
@@ -149,7 +126,7 @@ option, .weapon-name-input {
     font-size: 1.5rem;
 }
 
-.reset-btn {
+.reset-score-btn {
     height: 3rem;
     width: 10rem;
 
@@ -158,7 +135,7 @@ option, .weapon-name-input {
     margin-top: 2rem;
 }
 
-.reset-btn:hover {
+.reset-score-btn:hover {
     background-color: #9a4e34;
 }
 

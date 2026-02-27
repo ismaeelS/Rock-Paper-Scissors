@@ -11,7 +11,8 @@
         <meta property="og:description" content="Play Rock, Paper, Scissors between you and the computer. You can add additional choices, select an option at random, and autoplay the game."/>
 
         <title>Rock Paper Scissors</title>
-        <link rel="stylesheet" href="rock-paper-scissors.css">
+        <link rel="stylesheet" href="styles/rock-paper-scissors.css">
+        <link rel="stylesheet" href="styles/modal.css">
     </head>
     <body>
         <div class="js-gear-icon gear-icon">&#9881;</div>
@@ -23,17 +24,41 @@
                     <button class="js-close-btn close-btn" id="close">X</button>
                     <form class="modal-form">
                         <h2>General</h2>
-                        <div>
-                            <label for="autoplay-interval">Autoplay Interval in Seconds</label>
-                            <input type="number" name="autoplay-interval" id="autoplay-interval" min="0" max="10" placeholder="">
+                        <div class="general-settings-wrapper">
+                            <div class="general-setting">
+                                <label for="autoplay-interval">Autoplay Interval in Seconds</label>
+                                <input type="number" name="autoplay-interval" id="autoplay-interval" min="0" max="10">
+                            </div>
+                            <!-- HALP IMPLEMENT THIS -->
+                            <div class="general-setting">
+                                <label for="rotate-buttons">Rotate Buttons During Autoplay</label>
+                                <input type="checkbox" name="rotate-buttons" id="rotate-buttons">
+                            </div>
                         </div>
-                        <h2>Weapons</h2>
+                        
+                        <h2>Buttons</h2>
+                        <p>To unselect the last selected option on Mac, ⌘ + click. On PC, Ctrl + click</p>
+                        <div class="add-btn-wrapper">
+                            <button type="button" class="js-add-btn add-btn">Add New Button</button>
+                        </div>
+                        <!-- HALP FIND A WAY TO AUTOSCROLL TO THE BUTTON OF THE BUTTON SETTINGS -->
                         <div class="button-settings"></div>
-                        <button type="button" class="js-settings-add-btn">Add</button>
-                        <button type="reset" class="js-settings-reset-btn">Reset</button>
-                        <button type="button" class="js-settings-restore-btn">Restore Default</button>
-                        <!-- <button type="button" class="submit-btn">Submit</button> -->
-                        <input type="submit" value="Submit" class="submit-btn">
+                        <div class="undo-and-restore-wrapper">
+                            <button type="reset" class="js-settings-undo-btn undo-restore-btn">
+                                Undo Recent Edits
+                            </button>
+                            <button type="button" class="js-settings-restore-btn undo-restore-btn">
+                                Restore Default Settings
+                            </button>
+                        </div>
+                        <!-- HALP implement the following -->
+                        <div class="file-btns-wrapper">
+                            <button type="button" class="file-btn save-btn">Save File</button>
+                            <button type="button" class="file-btn upload-btn">Upload File</button>
+                        </div>
+                        <div class="submit-btn-wrapper">
+                            <button type="button" class="submit-btn">Submit Changes</button>
+                        </div>
                     </form>
                 </div>
             </section>
@@ -41,12 +66,13 @@
 
         <p class="js-page-title page-title">Rock Paper Scissors+</p>
 
-        <!-- HALP NEED TO FIX LAYOUT OF THE CIRCLES TO LOOK BETTER -->
-        <div class="js-button-holder button-holder">
-            <button class="js-random-btn random-btn move-btn">random</button>
-        </div>
+        <!-- HALP NEED TO FIX LAYOUT OF THE CIRCLES TO LOOK BETTER USE FLEXBOX -->
+        <div class="js-button-holder button-holder"></div>
         
-        <button class="js-autoplay-btn autoplay-btn">Autoplay</button>
+        <button class="js-autoplay-btn autoplay-btn" 
+        title="While autoplaying, you will no longer be able to select your moves or access the settings">
+            Autoplay
+        </button>
  
         <div class="js-results-text results-text">
             <p class="js-round-picks"></p>
@@ -59,10 +85,13 @@
         </div>
 
         <div>
-            <button class="js-reset-score-btn reset-btn">Reset Score</button>
+            <button class="js-reset-score-btn reset-score-btn">Reset Score</button>
         </div>
 
         <script src="data/weapons.js"></script>
-        <script src="rock-paper-scisssors.js"></script>
+        <script src="data/settings.js"></script>
+        
+        <script src="scripts/rock-paper-scisssors.js"></script>
+        <script src="scripts/settings-modal.js"></script>
     </body>
 </html>
