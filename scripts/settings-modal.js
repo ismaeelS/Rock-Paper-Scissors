@@ -26,10 +26,11 @@ function closeSettingsModal() {
  * otherwise add the new weapon to the modal weapons
  */
 function addWeaponToSettings() {
-    let newWeaponName = prompt("Enter the new button's name");
+    let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
     if (!newWeaponName) return;
 
-    newWeaponName = newWeaponName.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+    //HALP SHOULD NOT ACCEPT A NAME THAT STARTS WITH A NUMBER
+    newWeaponName = newWeaponName.replace(/[^A-Za-z0-9]/g, '').toLowerCase().substring(0,10);
 
     if (Object.keys(modalWeapons).includes(newWeaponName)) {
         alert("This button already exists");
@@ -56,8 +57,8 @@ function submitNewSettings() {
     for (let index = 0; index < modalListOfEntries.length; index++) {
         const currentModalEntry = modalListOfEntries[index];
 
-        let currentWeaponName = currentModalEntry.querySelector(`input.js-weapon-name-input`).value;
-        let currentWeaponShortcut = currentModalEntry.querySelector(`input.js-weapon-shortcut-input`).value;
+        let currentWeaponName = currentModalEntry.querySelector(`input.js-name-input`).value;
+        let currentWeaponShortcut = currentModalEntry.querySelector(`input.js-shortcut-input`).value;
 
         if (currentWeaponShortcut) {
             if (modalSettings["shortcuts"].includes(currentWeaponShortcut)) {

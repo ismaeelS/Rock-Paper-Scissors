@@ -1,0 +1,1 @@
+const imageNames = ["random", "rock", "paper", "scissors", "water"];

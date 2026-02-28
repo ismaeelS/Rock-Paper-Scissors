@@ -61,6 +61,14 @@ button {
 
     font-size: 6rem;
     cursor: pointer;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                            supported by Chrome, Edge, Opera and Firefox */
 }
 
 .gear-icon:hover {
@@ -86,12 +94,17 @@ button {
     flex-direction: row;
     flex-wrap: wrap;
 
-    justify-content: space-around;
+    justify-content: space-evenly;
 }
 
 .move-btn {
+    flex: 1 0 20rem;
+    margin: 2rem;
+
+
     height: 20rem;
-    width: 20rem;
+    max-width: 20rem;
+
 
     border-radius: 10rem;
 

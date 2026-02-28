@@ -32,6 +32,7 @@
     border-radius: 1rem;
     box-shadow: 2rem 2rem 2rem rgba(0, 0, 0, .9);
 
+    /* HALP FIND A WAY TO TAKE TAKE OF THE OVERFLOW WHEN TOO MANY ENTRIES */
     overflow: auto;
 
     padding: 0 3rem;
@@ -92,7 +93,7 @@ form p {
     border: .5rem solid #b0bd81;
 }
 
-option, .weapon-name-input {
+option, .name-input {
     text-transform: capitalize;
 }
 

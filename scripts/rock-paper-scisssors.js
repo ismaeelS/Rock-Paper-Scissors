@@ -90,9 +90,9 @@ function setupWeaponButtonListeners() {
     let randomButton = document.querySelector(".js-random-btn");
     randomButton.addEventListener("click", () => {if(!autoplaying) playOneRound(chooseRandomWeapon())});
     randomButton.addEventListener("mouseover", () => {if(!autoplaying)
-        randomButton.style.backgroundImage = `url("images/random.jpg")`;
+        setButtonBackground(randomButton, "random");
     });
-    randomButton.addEventListener("mouseout", () => {randomButton.style.backgroundImage = ``;});
+    randomButton.addEventListener("mouseout", () => {setButtonBackground(randomButton, "random", true);});
 
     //set up event listeners for each weapon
     Object.keys(weapons).forEach(weapon => {
@@ -105,13 +105,12 @@ function setupWeaponButtonListeners() {
 
         currentWeaponButton.addEventListener("mouseover", () => {
             if(!autoplaying) {
-                currentWeaponButton.style.backgroundImage = 
-                `url("images/${["rock", "paper", "scissors"].includes(weapon) ? weapon : "unknown"}.jpg")`;
+                setButtonBackground(currentWeaponButton, weapon);
             }
         });
 
         currentWeaponButton.addEventListener("mouseout", () => {
-            currentWeaponButton.style.backgroundImage = ``;
+            setButtonBackground(currentWeaponButton, weapon, true);
         });
 
         //add the weapon shortcut to the settings object
@@ -143,7 +142,10 @@ function setupWeaponButtonListeners() {
                     }
                 });
             }
-        } 
+        }
+        else {
+            // HALP add support to make esc close modal and add button equal to a
+        }
     });
 
     modalWeapons = JSON.parse(JSON.stringify(weapons));
@@ -157,6 +159,12 @@ function setupWeaponButtonListeners() {
     defaultSettings.autoPlayInterval = 2000;
     // defaultSettings.rotateButtons = false;
     modalSettings = JSON.parse(JSON.stringify(settings));
+}
+
+function setButtonBackground(buttonElement, weaponName, clearBackground=false) {
+    // console.log(buttonElement, weaponName, clearBackground);
+
+    buttonElement.style.backgroundImage = (clearBackground) ? "" : `url("images/${imageNames.includes(weaponName) ? weaponName : "unknown"}.jpg")`;
 }
 
 /**
@@ -199,6 +207,8 @@ function chooseRandomWeapon() {
 }
 
 function autoplayGame() {
+    console.log("in autoplay");
+
     if (!autoplaying) {
         if (confirm("While autoplaying, you will no longer be able to select your moves or access the settings. Do you want to start?")) {
 
@@ -206,15 +216,14 @@ function autoplayGame() {
 
             intervalId = setInterval(() => {
                 Object.keys(weapons).forEach(weapon => {
-                    weapons[weapon]["button"].style.backgroundImage = "";
+                    setButtonBackground(weapons[weapon]["button"], weapon, true);
                 });
 
                 const bothWeapons = playOneRound(chooseRandomWeapon());
 
                 //show the weapon background when it is picked during autoplay 
                 bothWeapons.forEach(weapon => {
-                    weapons[weapon]["button"].style.backgroundImage = 
-                    `url("images/${["rock", "paper", "scissors"].includes(weapon) ? weapon : "unknown"}.jpg")`;
+                    setButtonBackground(weapons[weapon]["button"], weapon);
                 });
             }, settings.autoPlayInterval);
 
@@ -224,7 +233,7 @@ function autoplayGame() {
     else {
         if (confirm("Stop autoplaying?")) {
             Object.keys(weapons).forEach(weapon => {
-                weapons[weapon]["button"].style.backgroundImage = "";
+                setButtonBackground(weapons[weapon]["button"], weapon, true);
             });
             
             clearInterval(intervalId);
@@ -341,9 +350,9 @@ function updateSettingsModal() {
         buttonSettingsSectionHTML += 
         `<div class="js-${weapon}-button-entry">
             <label for="${weapon}-name">Name</label>
-            <input type="text" name="${weapon}-name" id="${weapon}-name" class="weapon-name-input js-weapon-name-input" value="${weapon}" maxlength="10" disabled>
+            <input type="text" name="${weapon}-name" id="${weapon}-name" class="name-input js-name-input" value="${weapon}" maxlength="10" disabled>
             <label for="${weapon}-shortcut">Shortcut</label>
-            <input type="text" name="${weapon}-shortcut" id="${weapon}-shortcut" class="js-weapon-shortcut-input" value="${(modalWeapons[weapon]["shortcut"]) ? modalWeapons[weapon]["shortcut"] : ""}" maxlength="1">
+            <input type="text" name="${weapon}-shortcut" id="${weapon}-shortcut" class="js-shortcut-input" value="${(modalWeapons[weapon]["shortcut"]) ? modalWeapons[weapon]["shortcut"] : ""}" maxlength="1">
             
             ${Object.keys(modalWeapons).length > 1 ? 
                 `<label for="${weapon}-beats">Beats</label>
