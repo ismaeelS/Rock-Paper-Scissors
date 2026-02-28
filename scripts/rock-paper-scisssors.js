@@ -51,7 +51,19 @@ function initializeDefaultGameState() {
     generateDefaultWeaponsHTML();
 
     //set up listeners for the settings modal, the autoplay button, and the reset button
-    document.querySelector(".js-gear-icon").addEventListener("click", () => {if(!autoplaying) openSettingsModal();});
+    document.querySelector(".js-gear-icon").addEventListener("click", (e) => {
+        if(!autoplaying) {
+            e.target.classList.add("keep-rotating");
+
+            openSettingsModal();
+        }
+    });
+    document.querySelector(".js-plus-btn").addEventListener("click", (e) => {
+        if(!autoplaying) {
+            document.querySelector(".js-button-holder").classList.toggle("keep-rotating");
+        }
+    });
+
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
     document.querySelector(".modal-container").addEventListener("click", (e) => {
         if (settingsModalIsOpen && e.target === (document.querySelector(".modal-container")))
@@ -121,6 +133,8 @@ function setupWeaponButtonListeners() {
     document.addEventListener("keyup", function(event) {
         const keyPressed = event.key.toLowerCase();
 
+        console.log(keyPressed);
+
         if (!settingsModalIsOpen) {
             if (keyPressed === "?") {
                 playOneRound(chooseRandomWeapon());
@@ -143,8 +157,14 @@ function setupWeaponButtonListeners() {
                 });
             }
         }
+        // when the modal is open, allow for the following keyboard instructions
         else {
-            // HALP add support to make esc close modal and add button equal to a
+            if (keyPressed == "escape") {
+                closeSettingsModal();
+            }
+            else if (keyPressed == "enter") {
+                submitNewSettings();
+            }
         }
     });
 
@@ -161,6 +181,7 @@ function setupWeaponButtonListeners() {
     modalSettings = JSON.parse(JSON.stringify(settings));
 }
 
+// HALP ADD SUPPOR TFOR MORE DEFAULT PICS. CHANGE THE CHECK FROM INCLUDES TO DOUBLE SUBTRING
 function setButtonBackground(buttonElement, weaponName, clearBackground=false) {
     // console.log(buttonElement, weaponName, clearBackground);
 
@@ -345,10 +366,9 @@ function updateSettingsModal() {
     let buttonSettingsSectionHTML = "";
 
     // set up the html for each button entry. if there is only one entry, do not show ties, beats or the remove
-    // HALP remove weapon from weapon-name and also from the CSS
     Object.keys(modalWeapons).forEach(weapon => {
         buttonSettingsSectionHTML += 
-        `<div class="js-${weapon}-button-entry">
+        `<div class="js-${weapon}-button-entry button-entry">
             <label for="${weapon}-name">Name</label>
             <input type="text" name="${weapon}-name" id="${weapon}-name" class="name-input js-name-input" value="${weapon}" maxlength="10" disabled>
             <label for="${weapon}-shortcut">Shortcut</label>
@@ -374,9 +394,6 @@ function updateSettingsModal() {
     document.querySelectorAll(".js-remove-btn").forEach((removeButton) => {
         setUpRemoveButtonListener(removeButton);
     });
-
-    //HALP scroll down to new button
-    buttonSettingsSection.scrollHeight;
 
     //set up event listeners on inputs to update the entry names in the select dropdowns
     // const modalNameInputs = buttonSettingsSection.querySelectorAll("div > input:nth-of-type(1)");

@@ -1,10 +1,11 @@
 function openSettingsModal() {
     updateSettingsModal();
 
+    //scroll to the most recently created button when settings is opened
+    document.querySelector(".button-settings div:last-child").scrollIntoView();
+
     settingsModalIsOpen = true;
     settingsModal.style.visibility = 'visible';
-
-    document.querySelector(".js-gear-icon").classList.add("keep-rotating");
 }
 
 //HALP do some checks to make sure there isnt unsaved data by comparing savedSettings to settings

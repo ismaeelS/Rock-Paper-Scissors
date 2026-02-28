@@ -87,6 +87,10 @@ button {
     font-weight: bold;
 }
 
+.plus-btn {
+    cursor: progress;
+}
+
 .button-holder {
     margin: auto;
     
