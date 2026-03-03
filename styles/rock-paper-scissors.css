@@ -81,7 +81,7 @@ button {
 
 .page-title {
     margin-top: .5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 1rem;
 
     font-size: 5rem;
     font-weight: bold;
@@ -116,6 +116,7 @@ button {
 
     font-size: 4rem;
     text-transform: capitalize;
+    user-select: none;
 
     vertical-align: top;
 
@@ -131,8 +132,9 @@ button {
     border-radius: 3rem;
 
     font-size: 1.5rem;
+    user-select: none;
 
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .autoplay-btn:hover {
@@ -148,8 +150,10 @@ button {
     width: 10rem;
 
     font-size: 1rem;
+    user-select: none;
 
     margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .reset-score-btn:hover {
@@ -170,4 +174,12 @@ button {
 
 .turn-border-red {
     border-color: #f8a686;
+}
+
+.preload-images {
+    display: none;
+    background: url(../images/random.jpg) no-repeat -9999px -9999px;
+    background: url(../images/rock.jpg) no-repeat -9999px -9999px,
+            url(../images/paper.jpg) no-repeat -9999px -9999px,
+            url(../images/scissors.jpg) no-repeat -9999px -9999px;
 }

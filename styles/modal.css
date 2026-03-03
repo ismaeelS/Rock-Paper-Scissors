@@ -40,6 +40,10 @@
     text-align: left;
 }
 
+.modal button {
+    user-select: none;
+}
+
 .close-btn {
     position: absolute;
     top: 1rem;
@@ -51,6 +55,12 @@
 
     font-size: 2rem;
     color: #f8a686;
+}
+
+.general-setting {
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
 }
 
 .close-btn:hover {
@@ -79,10 +89,14 @@ form p {
 
 .add-btn {
     background: #1a1a1a;
-    border: .5rem solid #1a1a1a;
+    border: .5rem solid #b0bd81;
     border-radius: .25rem;
 
     margin-bottom: 2rem;
+    width: 100%;
+    height: 3rem;
+
+    font-weight: bold;
 }
 
 .add-btn:hover {
@@ -95,16 +109,39 @@ option, .name-input {
     text-transform: capitalize;
 }
 
+select {
+    width: 100%;
+}
+
 .button-entry {
     margin-bottom: 2rem;
+    border-top: .5rem solid gray;
+}
+
+.button-entry:last-child {
+    border-bottom: .5rem solid gray;
+}
+
+.entry-name-shortcut {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+}
+
+.entry-comparison-remove {
+    display: flex;
+    justify-content: space-between;
 }
 
 .remove-btn {
+    width: 20%;
     background: #c82333;
     border: .5rem solid #c42837;
     border-radius: .25rem;
 
     color: #1a1a1a;
+    
+    font-size: 1.25rem;
 }
 
 .remove-btn:hover {
@@ -162,9 +199,8 @@ option, .name-input {
 .submit-btn-wrapper {
     display: flex;
     justify-content: flex-end;
-    /* gap: 1rem; */
-    /* flex-wrap: wrap; */
 
+    margin-top: 1rem;
     margin-bottom: 1rem;
 }
 

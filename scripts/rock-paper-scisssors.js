@@ -1,25 +1,25 @@
 const defaultWeapons = {
-    "rock": {
-        "beats": ["scissors"],
-        "ties": [],
-        "shortcut": "r",
+    rock: {
+        beats: ["scissors"],
+        ties: [],
+        shortcut: "r",
     },
-    "paper": {
-        "beats": ["rock"],
-        "ties": [],
-        "shortcut": "p",
+    paper: {
+        beats: ["rock"],
+        ties: [],
+        shortcut: "p",
     },
-    "scissors": {
-        "beats": ["paper"],
-        "ties": [],
-        "shortcut": "s",
+    scissors: {
+        beats: ["paper"],
+        ties: [],
+        shortcut: "s",
     },
 };
 
 let defaultSettings = {
-    "autoPlayInterval": 2000,
-    "shortcuts": ["?", "a", "x"],
-    // "rotateButtons": false,
+    autoplayInterval: 2000,
+    shortcuts: ["?", "a", "x"],
+    askBeforeRemove: true,
 };
 
 // import score from local storage if available or initialize a score starting at 0-0-0
@@ -43,12 +43,17 @@ const pageTitle = document.querySelector(".js-page-title");
 const resultsParagraph = document.querySelector(".js-results-text");
 const winRateParagraph = document.querySelector(".js-win-rate");
 
-const settingsModal = document.querySelector(".modal-container");
-
 initializeDefaultGameState();
 
 function initializeDefaultGameState() {
     generateDefaultWeaponsHTML();
+
+    //add rock paper scissors into default settings for when user wants to restore default
+    Object.keys(weapons).forEach((weapon) => {
+        if (weapons[weapon]["shortcut"]) {
+            defaultSettings.shortcuts.push(weapons[weapon]["shortcut"]);
+        }
+    });
 
     //set up listeners for the settings modal, the autoplay button, and the reset button
     document.querySelector(".js-gear-icon").addEventListener("click", (e) => {
@@ -96,7 +101,6 @@ function generateDefaultWeaponsHTML() {
     arsenal.innerHTML = arsenalHTML;
 }
 
-//HALP find out if need to remove event listeners when elements are destroyed
 function setupWeaponButtonListeners() {
     //set up event listeners for the random button
     let randomButton = document.querySelector(".js-random-btn");
@@ -126,7 +130,8 @@ function setupWeaponButtonListeners() {
         });
 
         //add the weapon shortcut to the settings object
-        if (!settings["shortcuts"].includes(weapons[weapon]["shortcut"]))
+        //only if the shortcut is not empty and not already somehow in the array (should never happen)
+        if (weapons[weapon]["shortcut"] && !settings["shortcuts"].includes(weapons[weapon]["shortcut"]))
             settings["shortcuts"].push(weapons[weapon]["shortcut"]);
     });
 
@@ -175,16 +180,10 @@ function setupWeaponButtonListeners() {
     });
 
     //reassign default to include rock, paper, scissors for comparing checks in restore and undo. then reassign autoplay interval
-    defaultSettings = JSON.parse(JSON.stringify(settings));
-    defaultSettings.autoPlayInterval = 2000;
-    // defaultSettings.rotateButtons = false;
     modalSettings = JSON.parse(JSON.stringify(settings));
 }
 
-// HALP ADD SUPPOR TFOR MORE DEFAULT PICS. CHANGE THE CHECK FROM INCLUDES TO DOUBLE SUBTRING
 function setButtonBackground(buttonElement, weaponName, clearBackground=false) {
-    // console.log(buttonElement, weaponName, clearBackground);
-
     buttonElement.style.backgroundImage = (clearBackground) ? "" : `url("images/${imageNames.includes(weaponName) ? weaponName : "unknown"}.jpg")`;
 }
 
@@ -192,14 +191,14 @@ function setButtonBackground(buttonElement, weaponName, clearBackground=false) {
  * Update the webelements with the current scores and set the win rate text color to match success this game
  */
 function updateScoreboard() {
-    document.querySelector(".js-scoreboard").innerHTML =
+    const roundsPlayed = score.wins+score.ties+score.losses;
+    const winRate = score.wins/roundsPlayed;
+
+    document.querySelector(".js-scoreboard").innerHTML = (roundsPlayed < 1) ? "" :
     `Your record is
     ${score.wins} win${score.wins === 1?"":"s"}, 
     ${score.losses} loss${score.losses === 1?"":"es"}, and 
     ${score.ties} tie${score.ties === 1?"":"s"}`
-
-    const roundsPlayed = score.wins+score.ties+score.losses;
-    const winRate = score.wins/roundsPlayed;
 
     winRateParagraph.innerHTML = (roundsPlayed) ?
     `You have played ${roundsPlayed} round${roundsPlayed === 1?"":"s"} and your win rate is ${(winRate*100).toFixed(2)}%` : "";
@@ -211,6 +210,9 @@ function updateScoreboard() {
     else {
         winRateParagraph.classList.add(`turn-text-${winRate > (1/3) ? "green": "red"}`);
     }
+
+    //hide the reset button if there are no rounds to reset
+    document.querySelector(".js-reset-score-btn").style.visibility = (roundsPlayed) ? "visible": "hidden";
 }
 
 /**
@@ -246,7 +248,7 @@ function autoplayGame() {
                 bothWeapons.forEach(weapon => {
                     setButtonBackground(weapons[weapon]["button"], weapon);
                 });
-            }, settings.autoPlayInterval);
+            }, settings.autoplayInterval);
 
         autoplaying = true;
         }
@@ -356,10 +358,10 @@ function resetColors() {
 
 /**
  * set up input, input values, etc (unneccessary if using a framework)
- * HALP update this description
  */
 function updateSettingsModal() {
-    document.querySelector("#autoplay-interval").value = (modalSettings.autoPlayInterval)/1000;
+    document.querySelector("#autoplay-interval").value = (modalSettings.autoplayInterval)/1000;
+    document.querySelector("#ask-before-remove").checked = modalSettings.askBeforeRemove;
 
     const buttonSettingsSection = document.querySelector(".button-settings");
  
@@ -369,23 +371,33 @@ function updateSettingsModal() {
     Object.keys(modalWeapons).forEach(weapon => {
         buttonSettingsSectionHTML += 
         `<div class="js-${weapon}-button-entry button-entry">
-            <label for="${weapon}-name">Name</label>
-            <input type="text" name="${weapon}-name" id="${weapon}-name" class="name-input js-name-input" value="${weapon}" maxlength="10" disabled>
-            <label for="${weapon}-shortcut">Shortcut</label>
-            <input type="text" name="${weapon}-shortcut" id="${weapon}-shortcut" class="js-shortcut-input" value="${(modalWeapons[weapon]["shortcut"]) ? modalWeapons[weapon]["shortcut"] : ""}" maxlength="1">
+            <div class="entry-name-shortcut">
+                <div>
+                    <label for="${weapon}-name">Name</label>
+                    <input type="text" name="${weapon}-name" id="${weapon}-name" class="name-input js-name-input" value="${weapon}" maxlength="10" disabled>
+                </div>
+                <div>
+                    <label for="${weapon}-shortcut">Shortcut</label>
+                    <input type="text" name="${weapon}-shortcut" id="${weapon}-shortcut" class="js-shortcut-input" value="${(modalWeapons[weapon]["shortcut"]) ? modalWeapons[weapon]["shortcut"] : ""}" maxlength="1">
+                </div>
+            </div>
             
             ${Object.keys(modalWeapons).length > 1 ? 
-                `<label for="${weapon}-beats">Beats</label>
-            <select name="${weapon}-beats" id="${weapon}-beats" multiple>
-                ${settingsOptionValuesHTML(weapon, "beats")}
-            </select>
-            
-            <label for="${weapon}-ties">Ties</label>
-            <select name="${weapon}-ties" id="${weapon}-ties" multiple>
-                ${settingsOptionValuesHTML(weapon, "ties")}
-            </select>
-
-            <button type="button" class="js-remove-btn remove-btn" data-button-name="${weapon}">Remove</button>` : ""}            
+                `<div class="entry-comparison-remove">
+                    <div>
+                        <label for="${weapon}-beats">Beats:</label>
+                        <select name="${weapon}-beats" id="${weapon}-beats" multiple>
+                            ${createModalDropdownOptionsHTML(weapon, "beats")}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="${weapon}-ties">Ties:</label>
+                        <select name="${weapon}-ties" id="${weapon}-ties" multiple>
+                            ${createModalDropdownOptionsHTML(weapon, "ties")}
+                        </select>
+                    </div>
+                    <button type="button" class="js-remove-btn remove-btn" data-button-name="${weapon}">Remove</button>
+                </div>` : ""}            
         </div>`;
     });
 
@@ -394,20 +406,21 @@ function updateSettingsModal() {
     document.querySelectorAll(".js-remove-btn").forEach((removeButton) => {
         setUpRemoveButtonListener(removeButton);
     });
+    
+    //scroll to the most recently created button when modal is updated
+    document.querySelector(".button-settings").lastElementChild.scrollIntoView();
 
-    //set up event listeners on inputs to update the entry names in the select dropdowns
-    // const modalNameInputs = buttonSettingsSection.querySelectorAll("div > input:nth-of-type(1)");
+    //ideally the dropdown options would update when a new weapon is added
 }
 
-function settingsOptionValuesHTML(chosenWeapon, comparison) {
+function createModalDropdownOptionsHTML(chosenWeapon, comparison) {
     let optionValuesHTML = "";
 
-    //HALP remove the first condition. unneeded?
     Object.keys(modalWeapons).forEach(weapon => {
         if (chosenWeapon !== weapon) {
             optionValuesHTML += 
                 `<option 
-                    ${(modalWeapons[chosenWeapon][comparison] && modalWeapons[chosenWeapon][comparison].includes(weapon)) 
+                    ${modalWeapons[chosenWeapon][comparison].includes(weapon) 
                     ? "selected" : ""} value="${weapon}">${weapon}
                 </option>`
         }
@@ -416,42 +429,35 @@ function settingsOptionValuesHTML(chosenWeapon, comparison) {
     return optionValuesHTML;
 }
 
-//HALP if add a bunch of weapons, then remove, it breaks
 function setUpRemoveButtonListener(removeButton) {
     removeButton.addEventListener("click", () => {
         const currentWeaponName = removeButton.dataset.buttonName;
 
-        const buttonEntry = document.querySelector(`.js-${currentWeaponName}-button-entry`);
+        if (!modalSettings.askBeforeRemove || confirm(`Are you sure you want to remove the ${currentWeaponName} button?`)) {
 
-        const indexOfShortcut = modalSettings["shortcuts"].indexOf(modalWeapons[currentWeaponName]["shortcut"]);
-        if (indexOfShortcut > -1) modalSettings["shortcuts"].splice(indexOfShortcut, 1);
+            const buttonEntry = document.querySelector(`.js-${currentWeaponName}-button-entry`);
 
-        Object.keys(modalWeapons).forEach((weaponKey) => {
-            if (weaponKey === currentWeaponName) {
-                delete modalWeapons[weaponKey];
-            }
-            else {
-                console.log(modalWeapons, weaponKey);
+            const indexOfShortcut = modalSettings["shortcuts"].indexOf(modalWeapons[currentWeaponName]["shortcut"]);
+            if (indexOfShortcut > -1) modalSettings["shortcuts"].splice(indexOfShortcut, 1);
 
-                const indexOfWeaponInBeats = modalWeapons[weaponKey]["beats"].indexOf(currentWeaponName);
-                if (indexOfWeaponInBeats > -1) 
-                    modalWeapons[weaponKey]["beats"].splice(indexOfWeaponInBeats, 1);
-                
-                const indexOfWeaponInTies = modalWeapons[weaponKey]["ties"].indexOf(currentWeaponName);
-                if (indexOfWeaponInTies > -1)
-                    modalWeapons[weaponKey]["ties"].splice(indexOfWeaponInTies, 1);
-            }
-        });
+            Object.keys(modalWeapons).forEach((weaponKey) => {
+                if (weaponKey === currentWeaponName) {
+                    delete modalWeapons[weaponKey];
+                }
+                else {
+                    const indexOfWeaponInBeats = modalWeapons[weaponKey]["beats"].indexOf(currentWeaponName);
+                    if (indexOfWeaponInBeats > -1) 
+                        modalWeapons[weaponKey]["beats"].splice(indexOfWeaponInBeats, 1);
+                    
+                    const indexOfWeaponInTies = modalWeapons[weaponKey]["ties"].indexOf(currentWeaponName);
+                    if (indexOfWeaponInTies > -1)
+                        modalWeapons[weaponKey]["ties"].splice(indexOfWeaponInTies, 1);
+                }
+            });
 
-        buttonEntry.remove();
+            buttonEntry.remove();
 
-        updateSettingsModal();
+            updateSettingsModal();
+        }
     });
-}
-
-// HALP figure out preloading images
-function preloadImage(url) {
-    let img = new Image();
-    console.log(img)
-    img.src = url;
 }

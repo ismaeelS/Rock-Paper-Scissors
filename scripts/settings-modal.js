@@ -1,24 +1,25 @@
+document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
+    modalSettings.askBeforeRemove = e.target.checked;
+    alert("Remove Button Notification Settings Change Saved")
+});
+
 function openSettingsModal() {
     updateSettingsModal();
 
     //scroll to the most recently created button when settings is opened
-    document.querySelector(".button-settings div:last-child").scrollIntoView();
+    document.querySelector(".button-settings").lastElementChild.scrollIntoView();
 
     settingsModalIsOpen = true;
-    settingsModal.style.visibility = 'visible';
+    document.querySelector(".modal-container").style.visibility = 'visible';
 }
 
-//HALP do some checks to make sure there isnt unsaved data by comparing savedSettings to settings
-//HALP HAVE AN INDICATOR THAT CHANGES HAVE BEEN MADE BUT NOT SAVED like a red border and some text
-//HALP need event listeners on each form input to update modal weapons/settings and know if unsaved changes
+//ideally would have a check if there are unsaved values before allowing the modal to close
 function closeSettingsModal() {
-    // console.log("there are unsaved changes: ", (objectValuesAreDifferent(modalWeapons, weapons) || objectValuesAreDifferent(modalSettings, settings)));
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
     settingsModalIsOpen = false;
-    settingsModal.style.visibility = 'hidden';
+    document.querySelector(".modal-container").style.visibility = 'hidden';
 }
-
 
 /**
  * 
@@ -30,8 +31,17 @@ function addWeaponToSettings() {
     let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
     if (!newWeaponName) return;
 
-    //HALP SHOULD NOT ACCEPT A NAME THAT STARTS WITH A NUMBER
-    newWeaponName = newWeaponName.replace(/[^A-Za-z0-9]/g, '').toLowerCase().substring(0,10);
+    //remove non alphanumeric values, remove leading numbers and periods, lowercase and truncate
+    newWeaponName = newWeaponName.replace(/[^0-9a-z]/gi, '').toLowerCase().substring(0,10);
+
+    //if only numbers are given, set the name
+    if (!isNaN(newWeaponName)) newWeaponName = "BEEPBOOP";
+
+    //if too many w or m
+    const numberofMs = (newWeaponName.match(new RegExp("m", "g")) || []).length;
+    if (numberofMs > 4) newWeaponName = "m";
+    const numberofWs = (newWeaponName.match(new RegExp("w", "g")) || []).length;
+    if (numberofWs > 4) newWeaponName = "w";
 
     if (Object.keys(modalWeapons).includes(newWeaponName)) {
         alert("This button already exists");
@@ -45,14 +55,16 @@ function addWeaponToSettings() {
     updateSettingsModal();
 }
 
+//ideally would check if there are any form changes. if not then, would not execute
 function submitNewSettings() {
     modalWeapons = {};
     modalSettings = {
-        "autoPlayInterval": Number(document.querySelector("#autoplay-interval").value)*1000,
-        "shortcuts": ["?", "a", "x"],
+        autoplayInterval: Number(document.querySelector("#autoplay-interval").value)*1000,
+        shortcuts: ["?", "a", "x"],
+        askBeforeRemove: document.querySelector("#ask-before-remove").checked,
     };
 
-    const modalListOfEntries = document.querySelectorAll("form .button-settings div");
+    const modalListOfEntries = document.querySelectorAll(".button-entry");
 
     //load all values into the temporary modal weapons object
     for (let index = 0; index < modalListOfEntries.length; index++) {
@@ -60,6 +72,22 @@ function submitNewSettings() {
 
         let currentWeaponName = currentModalEntry.querySelector(`input.js-name-input`).value;
         let currentWeaponShortcut = currentModalEntry.querySelector(`input.js-shortcut-input`).value;
+
+        modalWeapons[currentWeaponName] = {};
+
+        let currentWeaponsDropdowns = currentModalEntry.querySelectorAll("select");
+
+        if (modalListOfEntries.length > 1) {
+            let currentWeaponBeats = Array.from(currentWeaponsDropdowns[0].selectedOptions).map(({ value }) => value);
+            let currentWeaponTies = Array.from(currentWeaponsDropdowns[1].selectedOptions).map(({ value }) => value);
+
+            modalWeapons[currentWeaponName]["beats"] = currentWeaponBeats;
+            modalWeapons[currentWeaponName]["ties"] = currentWeaponTies;
+        }
+        else {
+            modalWeapons[currentWeaponName]["beats"] = [];
+            modalWeapons[currentWeaponName]["ties"] = [];
+        }
 
         if (currentWeaponShortcut) {
             if (modalSettings["shortcuts"].includes(currentWeaponShortcut)) {
@@ -69,25 +97,8 @@ function submitNewSettings() {
             }
             
             modalSettings["shortcuts"].push(currentWeaponShortcut);
+            modalWeapons[currentWeaponName]["shortcut"] = currentWeaponShortcut;
         }
-
-        let currentWeaponsDropdowns = currentModalEntry.querySelectorAll("select");
-
-        if (modalListOfEntries.length > 1) {
-            let currentWeaponBeats = Array.from(currentWeaponsDropdowns[0].selectedOptions).map(({ value }) => value);
-            let currentWeaponTies = Array.from(currentWeaponsDropdowns[1].selectedOptions).map(({ value }) => value);
-
-            modalWeapons[currentWeaponName] = {};
-            modalWeapons[currentWeaponName]["beats"] = currentWeaponBeats;
-            modalWeapons[currentWeaponName]["ties"] = currentWeaponTies;
-        }
-        else {
-            modalWeapons[currentWeaponName] = {};
-            modalWeapons[currentWeaponName]["beats"] = [];
-            modalWeapons[currentWeaponName]["ties"] = [];
-        }
-        
-        modalWeapons[currentWeaponName]["shortcut"] = currentWeaponShortcut;
     }
 
     errorMessage = weaponsHaveConflicts(modalWeapons);
@@ -109,7 +120,7 @@ function submitNewSettings() {
     }
 }
 
-//current fails if name gets changed HALP. currently disabled input to handle
+//currently disabled input name change, but ideally would handle that
 function weaponsHaveConflicts(arsenal) {
     for (let i = 0; i < Object.keys(arsenal).length; i++) {
         const firstWeapon = Object.keys(arsenal)[i];
@@ -164,10 +175,10 @@ function weaponsHaveConflicts(arsenal) {
 function undoSettingsChanges() {
     //the reset button type resets the autoplay interval also so the timeout restores it
     setTimeout(function() {
-        document.querySelector("#autoplay-interval").value = (modalSettings.autoPlayInterval)/1000;
+        document.querySelector("#autoplay-interval").value = (modalSettings.autoplayInterval)/1000;
     }, 0);
 
-    if (objectValuesAreDifferent(modalWeapons, weapons) || objectValuesAreDifferent(modalSettings, settings)) {
+    if (!objectValuesAreTheSame(modalWeapons, weapons) || !objectValuesAreTheSame(modalSettings, settings)) {
         modalWeapons = JSON.parse(JSON.stringify(weapons));
         modalSettings = JSON.parse(JSON.stringify(settings))
 
@@ -178,13 +189,14 @@ function undoSettingsChanges() {
 }
 
 function restoreDefaultSettings() {
-    if ((objectValuesAreDifferent(modalWeapons, defaultWeapons) || objectValuesAreDifferent(modalSettings, defaultSettings)) 
+    if ((!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings))
         && confirm("Do you sure you want to restore default settings? All new buttons will be erased.")) {
+        
         weapons = JSON.parse(JSON.stringify(defaultWeapons));
         settings = JSON.parse(JSON.stringify(defaultSettings));
 
-        localStorage.setItem("weapons", JSON.stringify(weapons));
-        localStorage.setItem("settings", JSON.stringify(settings));
+        localStorage.removeItem("weapons");
+        localStorage.removeItem("settings");
 
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
@@ -192,25 +204,80 @@ function restoreDefaultSettings() {
     }
 }
 
-//compare the values in each object. if an object contains buttons (webelement), remove that key
-function objectValuesAreDifferent(objA, objB) {
-    if (Object.keys(objA).length !== Object.keys(objB).length) return true;
+// let OBJECTCOMPAREA = {
+//     a: {phil: {age:30, job:['teacher', 'blah']}},
+//     b: 2,
+//     c: {foo: 2, bar: 2},
+//     d: {baz: 1, bat: 2, arr:[2,3]},
+//     e: [1,2,{myNumber:3}],
+//     f: function hi(s){},
+//     g: null,
+//     h: Symbol('his'),
+//     i: NaN,
+//     j: Infinity,
+//     k: 'hi!',
+//     l: Date.now(),
+//     m: Promise
+// }
 
-    const tempA = JSON.parse(JSON.stringify(objA));
-    const tempB = JSON.parse(JSON.stringify(objB));
-    
-    Object.keys(tempA).forEach(key => {
-        if(tempA[key]["button"]) delete tempA[key]["button"];
-    });
-    
-    Object.keys(tempB).forEach(key => {
-        if(tempB[key]["button"]) delete tempB[key]["button"];
-    });
+// let OBJECTCOMPAREB = {
+//     a: {phil: {age:30, job:['teacher', 'blah']}},
+//     b: 2,
+//     c: {foo: 2, bar: 2},
+//     d: {baz: 1, bat: 2, arr:[2,3]},
+//     e: [1,2,{myNumber:3}],
+//     f: function hi(s){},
+//     g: null,
+//     h: Symbol('his'),
+//     i: NaN,
+//     j: Infinity,
+//     k: 'hi!',
+//     l: Date.now(),
+//     m: Promise
+// }
 
-    return JSON.stringify(Object.entries(tempA)) !== JSON.stringify(Object.entries(tempB));
+// credits to https://www.youtube.com/watch?v=8s3u656gpkk
+function objectValuesAreTheSame(objA, objB) {
 
-    // HALP CHECK IF YOU DONT NEED TO SORT
-    // REMOVED SORT IN THE SPECIFIC CASE WHERE USER REMOVES TWO OF THE ORIGINAL BUTTONS
-    // THEN READDS THEM IN A DIFFERENT ORDER (E.G. PAPER, SCISSORS, ROCK)
-    // return JSON.stringify(Object.entries(tempA).sort()) !== JSON.stringify(Object.entries(tempB).sort());
+    //recursion base cases
+    if (objA === objB) return true;
+
+    if (objA == null || objB == null) return false;
+
+    if (String(objA) == "NaN" || String(objB) == "NaN") {
+        return String(objA) === String(objB); 
+    }
+    // doesnt seem to handle nested booleans without the below check
+    else if (typeof objA === "boolean" && typeof objB === "boolean") {
+        return objA === objB;
+    }
+    else if (objA.toFixed || objB.toFixed) {
+        return objA === objB;
+    }
+
+    const specials = ["function", "symbol", "string"];
+
+    if (specials.includes(typeof objA) || specials.includes(typeof objB)) {
+        return String(objA) === String(objB);
+    }
+
+    //ignore the button key
+    const keys1 = String(Object.keys(objA).filter(key => key !== "button"));
+    const keys2 = String(Object.keys(objB).filter(key => key !== "button"));
+
+    //if the keys are either not matching or if they are matching but in a different order
+    //handles the case when still default buttons but user has changed order
+    if (keys1 !== keys2) {
+        return false;
+    }
+
+    for (const key of Object.keys(objA)) {
+        //ignore the button key and value
+        if (key === "button") {
+            continue;
+        }
+        if (!objectValuesAreTheSame(objA[key], objB[key])) return false;
+    }
+
+    return true;
 }

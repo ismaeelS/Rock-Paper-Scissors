@@ -15,7 +15,9 @@
         <link rel="stylesheet" href="styles/modal.css">
     </head>
     <body>
+        <div class="preload-images"></div>
         <div class="js-gear-icon gear-icon">&#9881;</div>
+        <!-- HALP NEED TO CREATE A NOTIFICATION THAT APPEARS INSTEAD OF ALERTS -->
 
         <section class="modal-container">
             <section class="modal">
@@ -29,10 +31,9 @@
                                 <label for="autoplay-interval">Autoplay Interval in Seconds</label>
                                 <input type="number" name="autoplay-interval" id="autoplay-interval" min="0" max="10">
                             </div>
-                            <!-- HALP IMPLEMENT THIS -->
                             <div class="general-setting">
-                                <label for="rotate-buttons">Rotate Buttons During Autoplay</label>
-                                <input type="checkbox" name="rotate-buttons" id="rotate-buttons">
+                                <label for="ask-before-remove">Ask Before Before Removing Buttons</label>
+                                <input type="checkbox" name="ask-before-remove" id="ask-before-remove" checked>
                             </div>
                         </div>
                         
@@ -41,7 +42,6 @@
                         <div class="add-btn-wrapper">
                             <button type="button" class="js-add-btn add-btn">Add New Button</button>
                         </div>
-                        <!-- HALP FIND A WAY TO AUTOSCROLL TO THE BUTTON OF THE BUTTON SETTINGS -->
                         <div class="button-settings"></div>
                         <div class="undo-and-restore-wrapper">
                             <button type="reset" class="js-settings-undo-btn undo-restore-btn">
@@ -52,10 +52,10 @@
                             </button>
                         </div>
                         <!-- HALP implement the following -->
-                        <div class="file-btns-wrapper">
+                        <!-- <div class="file-btns-wrapper">
                             <button type="button" class="file-btn save-btn">Save File</button>
                             <button type="button" class="file-btn upload-btn">Upload File</button>
-                        </div>
+                        </div> -->
                         <div class="submit-btn-wrapper">
                             <button type="button" class="submit-btn">Submit Changes</button>
                         </div>
@@ -84,7 +84,7 @@
             <p class="js-win-rate"></p>
         </div>
 
-        <div>
+        <div class="js-reset-score-btn-wrapper">
             <button class="js-reset-score-btn reset-score-btn">Reset Score</button>
         </div>
 
