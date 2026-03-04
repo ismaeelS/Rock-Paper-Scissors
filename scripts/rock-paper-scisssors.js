@@ -23,7 +23,7 @@ let defaultSettings = {
 };
 
 // import score from local storage if available or initialize a score starting at 0-0-0
-const score = JSON.parse(localStorage.getItem("score")) || {
+let score = JSON.parse(localStorage.getItem("score")) || {
     wins: 0,
     losses: 0,
     ties: 0,
@@ -78,6 +78,8 @@ function initializeDefaultGameState() {
     document.querySelector(".js-add-btn").addEventListener("click", () => {if(settingsModalIsOpen) addWeaponToSettings();});
     document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {if(settingsModalIsOpen) undoSettingsChanges();});
     document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {if(settingsModalIsOpen) restoreDefaultSettings()});
+    document.querySelector(".upload-btn").addEventListener("click", () => {if(settingsModalIsOpen) uploadFile()});
+    document.querySelector(".save-btn").addEventListener("click", () => {if(settingsModalIsOpen) saveFile()});
     document.querySelector(".submit-btn").addEventListener("click", () => {if(settingsModalIsOpen) submitNewSettings()});
 
     document.querySelector(".js-autoplay-btn").addEventListener("click", () => {if(!settingsModalIsOpen)autoplayGame();});
@@ -137,8 +139,6 @@ function setupWeaponButtonListeners() {
 
     document.addEventListener("keyup", function(event) {
         const keyPressed = event.key.toLowerCase();
-
-        console.log(keyPressed);
 
         if (!settingsModalIsOpen) {
             if (keyPressed === "?") {
@@ -230,8 +230,6 @@ function chooseRandomWeapon() {
 }
 
 function autoplayGame() {
-    console.log("in autoplay");
-
     if (!autoplaying) {
         if (confirm("While autoplaying, you will no longer be able to select your moves or access the settings. Do you want to start?")) {
 
