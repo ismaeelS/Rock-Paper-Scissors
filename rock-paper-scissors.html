@@ -13,11 +13,17 @@
         <title>Rock Paper Scissors</title>
         <link rel="stylesheet" href="styles/rock-paper-scissors.css">
         <link rel="stylesheet" href="styles/modal.css">
+        <link rel="stylesheet" href="styles/notification.css">
     </head>
     <body>
         <div class="preload-images"></div>
         <div class="js-gear-icon gear-icon">&#9881;</div>
-        <!-- HALP NEED TO CREATE A NOTIFICATION THAT APPEARS INSTEAD OF ALERTS -->
+
+        <div class="notification-container-wrapper">
+            <div class="notification-container"></div>
+        </div>
+
+        </div>
 
         <section class="modal-container">
             <section class="modal">
@@ -35,6 +41,11 @@
                                 <label for="ask-before-remove">Ask Before Before Removing Buttons</label>
                                 <input type="checkbox" name="ask-before-remove" id="ask-before-remove" checked>
                             </div>
+                            <div class="general-setting">
+                                <label for="show-warnings">Show Warnings (The Yellow Pop Up Notifications)</label>
+                                <input type="checkbox" name="show-warnings" id="show-warnings" checked>
+                            </div>
+                            <!-- HALP ADD ANOTHER SETTING TO HIDE WARNINGS and update file validity-->
                         </div>
                         
                         <h2>Buttons</h2>
@@ -53,10 +64,12 @@
                         </div>
                         <div class="file-btns-wrapper">
                             <button type="button" class="file-btn upload-btn">
-                                <label for="file-input">Upload File</label>
+                                <label for="file-input" class="file-input">Upload File</label>
                             </button>
                             <input type="file" id="file-input" accept="application/JSON">
                             <button type="button" class="file-btn save-btn">Save File</button>
+                            <!-- HALP IMPLEMENT THIS -->
+                            <button type="button" class="file-btn load-presets-btn">Load Presets</button>
                         </div>
                         <div class="submit-btn-wrapper">
                             <button type="button" class="submit-btn">Submit Changes</button>
@@ -71,10 +84,7 @@
 
         <div class="js-button-holder button-holder"></div>
         
-        <button class="js-autoplay-btn autoplay-btn" 
-        title="While autoplaying, you will no longer be able to select your moves or access the settings">
-            Autoplay
-        </button>
+        <button class="js-autoplay-btn autoplay-btn">Autoplay</button>
  
         <div class="js-results-text results-text">
             <p class="js-round-picks"></p>
@@ -96,5 +106,6 @@
         
         <script src="scripts/rock-paper-scisssors.js"></script>
         <script src="scripts/settings-modal.js"></script>
+        <script src="scripts/notification.js"></script>
     </body>
 </html>

@@ -20,6 +20,7 @@ let defaultSettings = {
     autoplayInterval: 2000,
     shortcuts: ["?", "a", "x"],
     askBeforeRemove: true,
+    showWarnings: true,
 };
 
 // import score from local storage if available or initialize a score starting at 0-0-0
@@ -75,15 +76,36 @@ function initializeDefaultGameState() {
             closeSettingsModal();
     });
 
-    document.querySelector(".js-add-btn").addEventListener("click", () => {if(settingsModalIsOpen) addWeaponToSettings();});
-    document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {if(settingsModalIsOpen) undoSettingsChanges();});
-    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {if(settingsModalIsOpen) restoreDefaultSettings()});
-    document.querySelector(".upload-btn").addEventListener("click", () => {if(settingsModalIsOpen) uploadFile()});
-    document.querySelector(".save-btn").addEventListener("click", () => {if(settingsModalIsOpen) saveFile()});
-    document.querySelector(".submit-btn").addEventListener("click", () => {if(settingsModalIsOpen) submitNewSettings()});
+    document.querySelector(".js-add-btn").addEventListener("click", () => {addWeaponToSettings();});
+    document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {undoSettingsChanges();});
+    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {restoreDefaultSettings()});
+    // HALP ADD THIS IN SETTINGS MODAL AND REMOVE AFTER THE FIRST 1/2/3 TIMES
+    document.querySelector(".js-settings-restore-btn").addEventListener("mouseenter", (e) => {        
+        showNotification("warning", "All General and Button Settings Will Be Reset. Score Keeping Will Not Be Affected", e.target, 5);
+    });
 
-    document.querySelector(".js-autoplay-btn").addEventListener("click", () => {if(!settingsModalIsOpen)autoplayGame();});
-    document.querySelector(".js-reset-score-btn").addEventListener("click", () => {if(!settingsModalIsOpen)resetScore();});
+    document.querySelector(".file-input").addEventListener("click", () => {uploadFile()});
+    // HALP ADD THIS IN SETTINGS MODAL AND REMOVE AFTER THE FIRST 1/2/3 TIMES
+    document.querySelector(".file-input").addEventListener("mouseenter", (e) => {
+        showNotification("warning", "The File Will Attempt to Overwrite Current Settings. This Cannot Be Undone", e.target, 5);
+    });
+    document.querySelector(".save-btn").addEventListener("click", () => {saveFile()});
+    document.querySelector(".submit-btn").addEventListener("click", () => {submitNewSettings()});
+
+    document.querySelector(".js-autoplay-btn").addEventListener("click", () => {autoplayGame();});
+    document.querySelector(".js-autoplay-btn").addEventListener("mouseenter", (e) => {
+        console.log(e.target);
+        if(!autoplaying) {
+            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves or Access the Settings", e.target);
+        }
+    });
+    document.querySelector(".js-reset-score-btn").addEventListener("click", () => {resetScore();});
+    document.querySelector(".js-reset-score-btn").addEventListener("mouseenter", (e) => {
+        // maybe remove the if condition
+        if(!settingsModalIsOpen) {
+            showNotification("warning", "All Score Data Will Be Reset. Buttons Will Not Be Affected", e.target);
+        }
+    });
 
     setupWeaponButtonListeners();
 
@@ -231,36 +253,28 @@ function chooseRandomWeapon() {
 
 function autoplayGame() {
     if (!autoplaying) {
-        if (confirm("While autoplaying, you will no longer be able to select your moves or access the settings. Do you want to start?")) {
-
-            document.querySelector(".js-autoplay-btn").title = "Stop autoplaying";
-
-            intervalId = setInterval(() => {
-                Object.keys(weapons).forEach(weapon => {
-                    setButtonBackground(weapons[weapon]["button"], weapon, true);
-                });
-
-                const bothWeapons = playOneRound(chooseRandomWeapon());
-
-                //show the weapon background when it is picked during autoplay 
-                bothWeapons.forEach(weapon => {
-                    setButtonBackground(weapons[weapon]["button"], weapon);
-                });
-            }, settings.autoplayInterval);
-
-        autoplaying = true;
-        }
-    }
-    else {
-        if (confirm("Stop autoplaying?")) {
+        intervalId = setInterval(() => {
             Object.keys(weapons).forEach(weapon => {
                 setButtonBackground(weapons[weapon]["button"], weapon, true);
             });
-            
-            clearInterval(intervalId);
-            document.querySelector(".js-autoplay-btn").title = "While autoplaying, you will no longer be able to select your moves or access the settings";
-            autoplaying = false;
-        }
+
+            const bothWeapons = playOneRound(chooseRandomWeapon());
+
+            //show the weapon background when it is picked during autoplay 
+            bothWeapons.forEach(weapon => {
+                setButtonBackground(weapons[weapon]["button"], weapon);
+            });
+        }, settings.autoplayInterval);
+
+    autoplaying = true;
+    }
+    else {
+        Object.keys(weapons).forEach(weapon => {
+            setButtonBackground(weapons[weapon]["button"], weapon, true);
+        });
+        
+        clearInterval(intervalId);
+        autoplaying = false;
     }
 }
 
@@ -312,8 +326,7 @@ function playOneRound(selectedPlayerWeapon) {
  * clear local storage, reset the border and text colors, display 0-0-0
  */
 function resetScore() {
-    if (score.wins + score.losses + score.ties 
-        && confirm("Are you sure you want to reset the score?")) {
+    if (score.wins + score.losses + score.ties) {
         
         score.wins = 0;
         score.losses = 0;
@@ -324,14 +337,11 @@ function resetScore() {
 
         localStorage.removeItem("score");
 
-        if (autoplaying && confirm("Also stop autoplaying?")) {
-            clearInterval(intervalId);
-            autoplaying = false;
-        }
-
         resetColors();
 
         updateScoreboard();
+
+        showNotification("success", "Score Has Been Reset");
     }
 }
 
@@ -360,6 +370,7 @@ function resetColors() {
 function updateSettingsModal() {
     document.querySelector("#autoplay-interval").value = (modalSettings.autoplayInterval)/1000;
     document.querySelector("#ask-before-remove").checked = modalSettings.askBeforeRemove;
+    document.querySelector("#show-warnings").checked = modalSettings.showWarnings;
 
     const buttonSettingsSection = document.querySelector(".button-settings");
  
@@ -432,7 +443,6 @@ function setUpRemoveButtonListener(removeButton) {
         const currentWeaponName = removeButton.dataset.buttonName;
 
         if (!modalSettings.askBeforeRemove || confirm(`Are you sure you want to remove the ${currentWeaponName} button?`)) {
-
             const buttonEntry = document.querySelector(`.js-${currentWeaponName}-button-entry`);
 
             const indexOfShortcut = modalSettings["shortcuts"].indexOf(modalWeapons[currentWeaponName]["shortcut"]);

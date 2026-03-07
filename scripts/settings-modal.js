@@ -1,6 +1,13 @@
 document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
     modalSettings.askBeforeRemove = e.target.checked;
-    alert("Remove Button Notification Settings Change Saved")
+    showNotification("success", "Setting Saved");
+});
+document.querySelector("#show-warnings").addEventListener("change", (e) => {
+    modalSettings.showWarnings = e.target.checked;
+    settings.showWarnings = e.target.checked;
+    showNotification("success", "Setting Saved");
+
+    //HALP ALSO ALLOW USER TO SET HOW LONG TO KEEP WARNINGS UP BUT RADIO WHICH GETS DISABLED HERE
 });
 
 function openSettingsModal() {
@@ -18,6 +25,9 @@ function openSettingsModal() {
 
 //ideally would have a check if there are unsaved values before allowing the modal to close
 function closeSettingsModal() {
+    if (!objectValuesAreTheSame(modalSettings, settings) || !objectValuesAreTheSame(modalWeapons, weapons)) {
+        showNotification("warning", "There are Unsaved Changes. Please Submit to Save Changes");
+    }
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
     settingsModalIsOpen = false;
@@ -31,13 +41,14 @@ function closeSettingsModal() {
  * otherwise add the new weapon to the modal weapons
  */
 function addWeaponToSettings() {
+    // HALP REPLACE THE ADD WEAPON BUTTON WITH INPUT THAT TAKES A BUTTON NAME
     let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
     if (!newWeaponName) return;
 
     newWeaponName = formatWeaponName(newWeaponName);
 
     if (Object.keys(modalWeapons).includes(newWeaponName)) {
-        alert("This button already exists");
+        showNotification("error", "This Button Already Exists");
         return;
     }
 
@@ -52,14 +63,20 @@ function formatWeaponName(attemptedWeaponName) {
     //remove non alphanumeric values, remove leading numbers and periods, lowercase and truncate
     attemptedWeaponName = attemptedWeaponName.replace(/[^0-9a-z]/gi, '').toLowerCase().substring(0,10);
 
-    //if only numbers are given, set the name
-    if (!isNaN(attemptedWeaponName)) attemptedWeaponName = "beepboop";
-
     //if too many w or m
     const numberofMs = (attemptedWeaponName.match(new RegExp("m", "g")) || []).length;
     if (numberofMs > 4) attemptedWeaponName = "m";
     const numberofWs = (attemptedWeaponName.match(new RegExp("w", "g")) || []).length;
     if (numberofWs > 4) attemptedWeaponName = "w";
+
+    const creativeExceptions = ["m", "w", "x"]
+
+    if (attemptedWeaponName.length == 1 && attemptedWeaponName !== "m" && attemptedWeaponName !== "w") {
+        attemptedWeaponName = "uncreative";
+    }
+
+    //if only numbers are given, set the name
+    if (!isNaN(attemptedWeaponName)) attemptedWeaponName = "beepboop";
 
     return attemptedWeaponName;
 }
@@ -77,12 +94,13 @@ function undoSettingsChanges() {
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
         updateSettingsModal();
+
+        showNotification("success", "Recent Edits Have Been Reversed");
     } 
 }
 
 function restoreDefaultSettings() {
-    if ((!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings))
-        && confirm("Do you sure you want to restore default settings? All new buttons will be erased.")) {
+    if (!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings)) {
         
         weapons = JSON.parse(JSON.stringify(defaultWeapons));
         settings = JSON.parse(JSON.stringify(defaultSettings));
@@ -93,12 +111,16 @@ function restoreDefaultSettings() {
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
         updateSettingsModal();
+
+        showNotification("success", "Default Settings Have Been Restored");
+    }
+    else {
+        showNotification("info", "Settings are Currently the Default");
     }
 }
 
 // credits to https://www.youtube.com/watch?v=8s3u656gpkk
 function objectValuesAreTheSame(objA, objB) {
-
     //recursion base cases
     if (objA === objB) return true;
 
@@ -144,15 +166,14 @@ function objectValuesAreTheSame(objA, objB) {
 
 //https://stackoverflow.com/questions/750032/reading-file-contents-on-the-client-side-in-javascript-in-various-browsers
 function uploadFile() {
-    if (confirm("Are you sure you want to overwrite your current settings, buttons and score?")) {
-        const fileInputElement = document.querySelector("#file-input");
+    const fileInputElement = document.querySelector("#file-input");
 
-        fileInputElement.addEventListener("change", (e) => {
-            checkAndUseFile(e);
-        });
-    }
+    fileInputElement.addEventListener("change", (e) => {
+        checkAndUseFile(e);
+    });
 }
 
+// HALP update modal settings not settings
 async function checkAndUseFile(event) {
     const file = event.target.files.item(0)
     const text = await file.text();
@@ -176,14 +197,17 @@ async function checkAndUseFile(event) {
 
         closeSettingsModal();
         initializeDefaultGameState();
+
+        showNotification("success", "File Successfully Uploaded");
     }
     else {
-        alert(fileError);
+        showNotification("error", fileError);
     }
 
     document.querySelector("#file-input").value = null;
 }
 
+// HALP make less rigorous. if missing certain values, just set them to default
 function validateInputFile(fileData) {
     if (fileData === "") {
         return "File is empty"
@@ -242,6 +266,10 @@ function validateInputFile(fileData) {
     }
 
     if (typeof fileData["settings"]["askBeforeRemove"] !== "boolean") {
+        return "askBeforeRemove must be a boolean";
+    }
+    
+    if (typeof fileData["settings"]["showWarnings"] !== "boolean") {
         return "askBeforeRemove must be a boolean";
     }
 
@@ -306,8 +334,6 @@ function validateInputFile(fileData) {
     if (weaponConflict) {
         return weaponConflict;
     }
-
-    return false;
 }
 
 //currently disabled input name change, but ideally would handle that
@@ -375,6 +401,8 @@ function saveFile() {
     a.download = "rockpaperscissors_savefile.json";
     a.click();
     URL.revokeObjectURL(a.href);
+
+    //HALP FIND OUT HOW TO TELL IF USER SAVED A FILE VS CANCELLED then show Notification
 }
 
 //ideally would check if there are any form changes. if not then, would not execute
@@ -384,6 +412,7 @@ function submitNewSettings() {
         autoplayInterval: Number(document.querySelector("#autoplay-interval").value)*1000,
         shortcuts: ["?", "a", "x"],
         askBeforeRemove: document.querySelector("#ask-before-remove").checked,
+        showWarnings: document.querySelector("#show-warnings").checked,
     };
 
     // if user manually enter unsupported number, limit it. ideally would allow restricted typing
@@ -397,7 +426,7 @@ function submitNewSettings() {
         const currentModalEntry = modalListOfEntries[index];
 
         let currentWeaponName = currentModalEntry.querySelector(`input.js-name-input`).value;
-        let currentWeaponShortcut = currentModalEntry.querySelector(`input.js-shortcut-input`).value;
+        let currentWeaponShortcut = currentModalEntry.querySelector(`input.js-shortcut-input`).value.toLowerCase();
 
         modalWeapons[currentWeaponName] = {};
 
@@ -417,7 +446,7 @@ function submitNewSettings() {
 
         if (currentWeaponShortcut) {
             if (modalSettings["shortcuts"].includes(currentWeaponShortcut)) {
-                alert("This shortcut already exists");
+                showNotification("error", "This Shortcut Already Exists");
 
                 return;
             }
@@ -430,6 +459,8 @@ function submitNewSettings() {
     errorMessage = weaponsHaveConflicts(modalWeapons);
 
     if (!errorMessage) {
+        const settingsAreDifferent = !objectValuesAreTheSame(weapons, modalWeapons) || !objectValuesAreTheSame(settings, modalSettings);
+
         weapons = JSON.parse(JSON.stringify(modalWeapons));
         settings = JSON.parse(JSON.stringify(modalSettings));
 
@@ -440,8 +471,10 @@ function submitNewSettings() {
 
         localStorage.setItem("settings", JSON.stringify(settings));
         localStorage.setItem("weapons", JSON.stringify(weapons));
+
+        if (settingsAreDifferent) showNotification("success", "Settings Succesfully Updated");
     }
     else {
-        alert(errorMessage);
+        showNotification("error", errorMessage, 5);
     }
 }

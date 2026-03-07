@@ -1,0 +1,59 @@
+.notification-controls button {
+    color: white;
+    border-radius: .25rem;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.success {
+    background: #3a9f51;
+    border: .5rem solid #3e9d54;
+}
+
+.error {
+    background: #c82333;
+    border: .5rem solid #c42837;
+}
+
+.warning {
+    background: #6d767d;
+    border: .5rem solid #f59e0b;
+}
+
+.info {
+    background: #4d7eb3;
+    border: .5rem solid #537eac;
+}
+
+.notification-container-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.notification-container {
+    position: fixed;
+    top: 1rem;
+    z-index: 999;
+}
+
+.notification {
+    background-color: wheat;
+    color: #1a1a1a;
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 .5rem 1rem #6d767d;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
