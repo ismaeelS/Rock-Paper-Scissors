@@ -6,8 +6,6 @@ document.querySelector("#show-warnings").addEventListener("change", (e) => {
     modalSettings.showWarnings = e.target.checked;
     settings.showWarnings = e.target.checked;
     showNotification("success", "Setting Saved");
-
-    //HALP ALSO ALLOW USER TO SET HOW LONG TO KEEP WARNINGS UP BUT RADIO WHICH GETS DISABLED HERE
 });
 
 function openSettingsModal() {
@@ -26,7 +24,7 @@ function openSettingsModal() {
 //ideally would have a check if there are unsaved values before allowing the modal to close
 function closeSettingsModal() {
     if (!objectValuesAreTheSame(modalSettings, settings) || !objectValuesAreTheSame(modalWeapons, weapons)) {
-        showNotification("warning", "There are Unsaved Changes. Please Submit to Save Changes");
+        showNotification("warning", "Button Edits Not Saved. Please Click Submit to Save Changes");
     }
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
@@ -71,7 +69,7 @@ function formatWeaponName(attemptedWeaponName) {
 
     const creativeExceptions = ["m", "w", "x"]
 
-    if (attemptedWeaponName.length == 1 && attemptedWeaponName !== "m" && attemptedWeaponName !== "w") {
+    if (attemptedWeaponName.length == 1 && !creativeExceptions.includes(attemptedWeaponName)) {
         attemptedWeaponName = "uncreative";
     }
 
@@ -173,7 +171,6 @@ function uploadFile() {
     });
 }
 
-// HALP update modal settings not settings
 async function checkAndUseFile(event) {
     const file = event.target.files.item(0)
     const text = await file.text();
@@ -183,31 +180,28 @@ async function checkAndUseFile(event) {
     const fileError = validateInputFile(fileData);
 
     const fileDataDiffersFromCurrentData = !objectValuesAreTheSame(score, fileData["score"]) || 
-    !objectValuesAreTheSame(settings, fileData["settings"]) || 
-    !objectValuesAreTheSame(weapons, fileData["weapons"]);
+    !objectValuesAreTheSame(modalSettings, fileData["settings"]) || 
+    !objectValuesAreTheSame(modalWeapons, fileData["weapons"]);
     
     if (!fileError && fileDataDiffersFromCurrentData) {
-        score = JSON.parse(JSON.stringify(fileData["score"]));
-        settings = JSON.parse(JSON.stringify(fileData["settings"]));
-        weapons = JSON.parse(JSON.stringify(fileData["weapons"]));
+        modalScore = JSON.parse(JSON.stringify(fileData["score"]));
+        modalSettings = JSON.parse(JSON.stringify(fileData["settings"]));
+        modalWeapons = JSON.parse(JSON.stringify(fileData["weapons"]));
 
-        localStorage.setItem("score", JSON.stringify(score));
-        localStorage.setItem("settings", JSON.stringify(settings));
-        localStorage.setItem("weapons", JSON.stringify(weapons));
-
-        closeSettingsModal();
-        initializeDefaultGameState();
+        updateSettingsModal();
 
         showNotification("success", "File Successfully Uploaded");
     }
+    else if (!fileDataDiffersFromCurrentData) {
+        showNotification("info", "File Data Matches Current Save")
+    }
     else {
-        showNotification("error", fileError);
+        showNotification("error", fileError, null, 5);
     }
 
     document.querySelector("#file-input").value = null;
 }
 
-// HALP make less rigorous. if missing certain values, just set them to default
 function validateInputFile(fileData) {
     if (fileData === "") {
         return "File is empty"
@@ -216,14 +210,22 @@ function validateInputFile(fileData) {
     const fileDataKeys = Object.keys(fileData);
     const gameKeys = ["score", "settings", "weapons"];
 
+    let numberOfMissingGameKeys = 0;
+
     for (let i = 0; i < gameKeys.length; i++) {
         const currentGameKey = gameKeys[i];
 
         if (!fileDataKeys.includes(currentGameKey)) {
-            return `The file is missing the ${currentGameKey} key`;
+            fileData[currentGameKey] = {};
+            numberOfMissingGameKeys++;
         }
     }
 
+    if (numberOfMissingGameKeys === gameKeys.length) {
+        return `This file does not contain any of the following as base keys: ${gameKeys}`
+    }
+
+    //settings validation
     const fileDataSettingsKeys = Object.keys(fileData["settings"]);
     const settingsKeys = Object.keys(settings);
 
@@ -231,27 +233,28 @@ function validateInputFile(fileData) {
         const currentSettingsKey = settingsKeys[i];
 
         if (!fileDataSettingsKeys.includes(currentSettingsKey)) {
-            return `The file is missing the ${currentSettingsKey} settings key`;
+            fileData["settings"][currentSettingsKey] = null;
         }
     }
-    
-    const fileDataScoreKeys = Object.keys(fileData["score"]);
-    const scoreKeys = Object.keys(score);
 
-    for (let i = 0; i < scoreKeys.length; i++) {
-        const currentScoreKey = scoreKeys[i];
+    if (!fileData["settings"]["askBeforeRemove"]) {
+        fileData["settings"]["askBeforeRemove"] = true;
+    }
 
-        if (!fileDataScoreKeys.includes(currentScoreKey)) {
-            return `The file is must include "wins", "losses", and "ties" as score keys. ${currentScoreKey} is missing`;
-        }
+    if (typeof fileData["settings"]["askBeforeRemove"] !== "boolean") {
+        fileData["settings"]["askBeforeRemove"] = true;
+    }
 
-        if (fileData["score"][currentScoreKey] < 0) {
-            return `${fileData["score"][currentScoreKey]} cannot be negative`
-        }
+    if (!fileData["settings"]["autoplayInterval"]) {
+        fileData["settings"]["autoplayInterval"] = 2000;
     }
 
     if (typeof fileData["settings"]["autoplayInterval"] !== "number" || fileData.settings["autoplayInterval"] < 0 || fileData.settings["autoplayInterval"] > 10000) {
-        return "autoplayInterval must be a valid number between 0 and 10000";
+        fileData["settings"]["autoplayInterval"] = 2000;
+    }
+    
+    if (!fileData["settings"]["shortcuts"]) {
+        fileData["settings"]["shortcuts"] = ["?", "a", "x"];
     }
 
     const fileDataSettingsShortcuts = fileData["settings"]["shortcuts"];
@@ -261,25 +264,53 @@ function validateInputFile(fileData) {
         const currentSettingsShortcut = defaultShortcuts[i];
 
         if (!fileDataSettingsShortcuts.includes(currentSettingsShortcut)) {
-            return `The file is must include "?", "a", and "x" as shortcuts. ${currentSettingsShortcut} is missing`;
+            fileDataSettingsShortcuts.push(currentSettingsShortcut);
         }
     }
 
-    if (typeof fileData["settings"]["askBeforeRemove"] !== "boolean") {
-        return "askBeforeRemove must be a boolean";
+    for (let i = 0; i < fileData["settings"]["shortcuts"].length; i++) {
+        const currentFileShortcut = fileData["settings"]["shortcuts"][i];
+
+        if (currentFileShortcut.length > 1) {
+            return `Shortcuts cannot be longer than one character.`;
+        }
     }
     
-    if (typeof fileData["settings"]["showWarnings"] !== "boolean") {
-        return "askBeforeRemove must be a boolean";
+    if (!fileData["settings"]["showWarnings"]) {
+        fileData["settings"]["showWarnings"] = true;
     }
 
+    if (typeof fileData["settings"]["showWarnings"] !== "boolean") {
+        fileData["settings"]["showWarnings"] = true;
+    }
+
+    //score validation    
+    const fileDataScoreKeys = Object.keys(fileData["score"]);
+    const scoreKeys = Object.keys(score);
+
+    for (let i = 0; i < scoreKeys.length; i++) {
+        const currentScoreKey = scoreKeys[i];
+
+        if (!fileDataScoreKeys.includes(currentScoreKey)) {
+            fileData["score"][currentScoreKey] = 0;
+        }
+
+        if (typeof fileData["score"][currentScoreKey] !== "number") {
+            return `All score values need to be numbers ${currentScoreKey} is not a number`;
+        }
+
+        if (fileData["score"][currentScoreKey] < 0) {
+            return `${fileData["score"][currentScoreKey]} cannot be negative`
+        }
+    }
+
+    //weapon validation
     const fileDataWeapons = Object.keys(fileData["weapons"]);
 
     if (fileDataWeapons.length < 1) {
         return "Weapons must contain at least one entry";
     }
 
-    //begin formatting file data
     //check duplicate weapon names
     const trackUniqueNames = [];
     //take care of misformatted weapon names
@@ -289,10 +320,10 @@ function validateInputFile(fileData) {
         const currentWeapon = fileDataWeapons[i];
         
         if (!fileData["weapons"][currentWeapon]["beats"]) {
-            return `${currentWeapon} does not have a key for beats`;
+            fileData["weapons"][currentWeapon]["beats"] = [];
         }
         if(!fileData["weapons"][currentWeapon]["ties"]) {
-            return `${currentWeapon} does not have a key for ties`;
+            fileData["weapons"][currentWeapon]["ties"] = [];
         }
 
         const formattedWeaponName = formatWeaponName(currentWeapon);
@@ -327,7 +358,6 @@ function validateInputFile(fileData) {
             }
         });
     });
-    //end formatting file data
 
     const weaponConflict = weaponsHaveConflicts(fileData["weapons"]);
 
@@ -401,8 +431,6 @@ function saveFile() {
     a.download = "rockpaperscissors_savefile.json";
     a.click();
     URL.revokeObjectURL(a.href);
-
-    //HALP FIND OUT HOW TO TELL IF USER SAVED A FILE VS CANCELLED then show Notification
 }
 
 //ideally would check if there are any form changes. if not then, would not execute
@@ -446,7 +474,7 @@ function submitNewSettings() {
 
         if (currentWeaponShortcut) {
             if (modalSettings["shortcuts"].includes(currentWeaponShortcut)) {
-                showNotification("error", "This Shortcut Already Exists");
+                showNotification("error", "This Shortcut Already Exists. Shortcut Will Not be Saved");
 
                 return;
             }
@@ -459,20 +487,28 @@ function submitNewSettings() {
     errorMessage = weaponsHaveConflicts(modalWeapons);
 
     if (!errorMessage) {
-        const settingsAreDifferent = !objectValuesAreTheSame(weapons, modalWeapons) || !objectValuesAreTheSame(settings, modalSettings);
+        const settingsAreDifferent = !objectValuesAreTheSame(weapons, modalWeapons) || !objectValuesAreTheSame(settings, modalSettings) || !objectValuesAreTheSame(score, modalScore);
 
         weapons = JSON.parse(JSON.stringify(modalWeapons));
         settings = JSON.parse(JSON.stringify(modalSettings));
+        score = JSON.parse(JSON.stringify(modalScore));
 
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
+        updateScoreboard();
         
         closeSettingsModal();
 
         localStorage.setItem("settings", JSON.stringify(settings));
         localStorage.setItem("weapons", JSON.stringify(weapons));
+        localStorage.setItem("score", JSON.stringify(score));
 
-        if (settingsAreDifferent) showNotification("success", "Settings Succesfully Updated");
+        if (settingsAreDifferent) {
+            showNotification("success", "Settings Succesfully Updated");
+        }
+        else {
+            showNotification ("info", "No Edits Have Been Made");
+        }
     }
     else {
         showNotification("error", errorMessage, 5);

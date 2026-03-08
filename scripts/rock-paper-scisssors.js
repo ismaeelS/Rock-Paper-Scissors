@@ -33,8 +33,9 @@ let score = JSON.parse(localStorage.getItem("score")) || {
 settings = JSON.parse(localStorage.getItem("settings")) || defaultSettings;
 weapons = JSON.parse(localStorage.getItem("weapons")) || defaultWeapons;
 
-let modalWeapons = "";
-let modalSettings = "";
+let modalWeapons = {};
+let modalSettings = {};
+let modalScore = {};
 
 let autoplaying = false;
 let intervalId;
@@ -72,39 +73,45 @@ function initializeDefaultGameState() {
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
     document.querySelector(".modal-container").addEventListener("click", (e) => {
-        if (settingsModalIsOpen && e.target === (document.querySelector(".modal-container")))
+        if (e.target === (document.querySelector(".modal-container")))
             closeSettingsModal();
     });
 
     document.querySelector(".js-add-btn").addEventListener("click", () => {addWeaponToSettings();});
+    
     document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {undoSettingsChanges();});
-    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {restoreDefaultSettings()});
-    // HALP ADD THIS IN SETTINGS MODAL AND REMOVE AFTER THE FIRST 1/2/3 TIMES
-    document.querySelector(".js-settings-restore-btn").addEventListener("mouseenter", (e) => {        
-        showNotification("warning", "All General and Button Settings Will Be Reset. Score Keeping Will Not Be Affected", e.target, 5);
+    document.querySelector(".js-modal-reset-score-btn").addEventListener("click", () => {resetScore();});
+    document.querySelector(".js-modal-reset-score-btn").addEventListener("mouseenter", (e) => {
+        showNotification("warning", "Score History Will Be Reset. Buttons Will Not Be Affected", e.target);
     });
-
-    document.querySelector(".file-input").addEventListener("click", () => {uploadFile()});
-    // HALP ADD THIS IN SETTINGS MODAL AND REMOVE AFTER THE FIRST 1/2/3 TIMES
-    document.querySelector(".file-input").addEventListener("mouseenter", (e) => {
-        showNotification("warning", "The File Will Attempt to Overwrite Current Settings. This Cannot Be Undone", e.target, 5);
+    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {restoreDefaultSettings()});
+    document.querySelector(".js-settings-restore-btn").addEventListener("mouseenter", (e) => {        
+        showNotification("warning", "All Settings Will Be Reset. Score Will Not Be Affected", e.target);
+    });
+    document.querySelector(".js-reset-all-btn").addEventListener("click", () => {resetScore(); restoreDefaultSettings()});
+    document.querySelector(".js-reset-all-btn").addEventListener("mouseenter", (e) => {        
+        showNotification("warning", "All Score Data and Settings Will Be Reset", e.target);
+    });
+    
+    document.querySelector(".upload-btn").addEventListener("click", () => {uploadFile()});
+    document.querySelector(".upload-btn").addEventListener("mouseenter", (e) => {
+        showNotification("warning", "The File Will Attempt to Overwrite Current Settings. This Cannot Be Undone", e.target);
     });
     document.querySelector(".save-btn").addEventListener("click", () => {saveFile()});
-    document.querySelector(".submit-btn").addEventListener("click", () => {submitNewSettings()});
+    document.querySelector(".js-submit-btn").addEventListener("click", () => {submitNewSettings()});
 
     document.querySelector(".js-autoplay-btn").addEventListener("click", () => {autoplayGame();});
     document.querySelector(".js-autoplay-btn").addEventListener("mouseenter", (e) => {
-        console.log(e.target);
         if(!autoplaying) {
             showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves or Access the Settings", e.target);
+        }
+        else {
+            showNotification("info", "Click Autoplay Again to End Autoplay", e.target);
         }
     });
     document.querySelector(".js-reset-score-btn").addEventListener("click", () => {resetScore();});
     document.querySelector(".js-reset-score-btn").addEventListener("mouseenter", (e) => {
-        // maybe remove the if condition
-        if(!settingsModalIsOpen) {
-            showNotification("warning", "All Score Data Will Be Reset. Buttons Will Not Be Affected", e.target);
-        }
+        showNotification("warning", "All Score Data Will Be Reset. Buttons Will Not Be Affected", e.target, 5);
     });
 
     setupWeaponButtonListeners();
@@ -235,6 +242,8 @@ function updateScoreboard() {
 
     //hide the reset button if there are no rounds to reset
     document.querySelector(".js-reset-score-btn").style.visibility = (roundsPlayed) ? "visible": "hidden";
+
+    modalScore = JSON.parse(JSON.stringify(score));
 }
 
 /**
@@ -445,21 +454,19 @@ function setUpRemoveButtonListener(removeButton) {
         if (!modalSettings.askBeforeRemove || confirm(`Are you sure you want to remove the ${currentWeaponName} button?`)) {
             const buttonEntry = document.querySelector(`.js-${currentWeaponName}-button-entry`);
 
-            const indexOfShortcut = modalSettings["shortcuts"].indexOf(modalWeapons[currentWeaponName]["shortcut"]);
-            if (indexOfShortcut > -1) modalSettings["shortcuts"].splice(indexOfShortcut, 1);
+            modalSettings["shortcuts"] = modalSettings["shortcuts"].filter(shortcut => 
+                shortcut !== modalWeapons[currentWeaponName]["shortcut"]);
 
             Object.keys(modalWeapons).forEach((weaponKey) => {
                 if (weaponKey === currentWeaponName) {
                     delete modalWeapons[weaponKey];
                 }
                 else {
-                    const indexOfWeaponInBeats = modalWeapons[weaponKey]["beats"].indexOf(currentWeaponName);
-                    if (indexOfWeaponInBeats > -1) 
-                        modalWeapons[weaponKey]["beats"].splice(indexOfWeaponInBeats, 1);
+                    modalWeapons[weaponKey]["beats"] = modalWeapons[weaponKey]["beats"].filter(weaponNameinBeats => 
+                        weaponNameinBeats !== currentWeaponName);
                     
-                    const indexOfWeaponInTies = modalWeapons[weaponKey]["ties"].indexOf(currentWeaponName);
-                    if (indexOfWeaponInTies > -1)
-                        modalWeapons[weaponKey]["ties"].splice(indexOfWeaponInTies, 1);
+                    modalWeapons[weaponKey]["ties"] = modalWeapons[weaponKey]["ties"].filter(weaponNameinTies => 
+                        weaponNameinTies !== currentWeaponName);
                 }
             });
 

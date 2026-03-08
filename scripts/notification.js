@@ -1,10 +1,10 @@
 //this is to restrict the notifications spamming the screen
-const activeNotifications = [];
+let activeNotifications = [];
 
-const notificationContainer = document.querySelector(".notification-container");
-        
 // https://www.youtube.com/watch?v=wZu4q0FyTOk
 function showNotification(messageType, message, buttonElement=null, secondsVisible=2) {
+    const notificationContainer = document.querySelector(".notification-container");
+    
     // if warnings are turned off, do not show the notification
     if (messageType === "warning" && !settings.showWarnings) {
         return;
@@ -19,7 +19,7 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
         activeNotifications.push(thisMessageID);
     }
 
-    //disable the button temporarily so user can see the the warning
+    //disable the button temporarily so user can see the warning
     if (buttonElement) {
         buttonElement.disabled = true;
         
@@ -36,8 +36,7 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
     notificationContainer.appendChild(notification);
 
     setTimeout(() => {
-        const messageIndex = activeNotifications.indexOf(thisMessageID);
-        if (messageIndex > -1) activeNotifications.splice(thisMessageID, 1);
+        activeNotifications = activeNotifications.filter((messageID) => messageID!==thisMessageID);
         notification.remove();
     }, secondsVisible*1000);
 }

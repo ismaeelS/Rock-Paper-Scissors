@@ -45,7 +45,6 @@
                                 <label for="show-warnings">Show Warnings (The Yellow Pop Up Notifications)</label>
                                 <input type="checkbox" name="show-warnings" id="show-warnings" checked>
                             </div>
-                            <!-- HALP ADD ANOTHER SETTING TO HIDE WARNINGS and update file validity-->
                         </div>
                         
                         <h2>Buttons</h2>
@@ -59,7 +58,11 @@
                                 Undo Recent Edits
                             </button>
                             <button type="button" class="js-settings-restore-btn undo-restore-btn">
-                                Restore Default Settings
+                                Reset Settings
+                            </button>
+                            <button type="button" class="js-modal-reset-score-btn undo-restore-btn">Reset Score</button>
+                            <button type="button" class="js-reset-all-btn undo-restore-btn">
+                                Reset All
                             </button>
                         </div>
                         <div class="file-btns-wrapper">
@@ -67,12 +70,12 @@
                                 <label for="file-input" class="file-input">Upload File</label>
                             </button>
                             <input type="file" id="file-input" accept="application/JSON">
-                            <button type="button" class="file-btn save-btn">Save File</button>
-                            <!-- HALP IMPLEMENT THIS -->
-                            <button type="button" class="file-btn load-presets-btn">Load Presets</button>
+                            <button type="button" class="file-btn save-btn">Save to File</button>
                         </div>
-                        <div class="submit-btn-wrapper">
-                            <button type="button" class="submit-btn">Submit Changes</button>
+                        <div class="preset-submit-btn-wrapper">
+                            <!-- HALP IMPLEMENT THIS -->
+                            <button type="button" class="load-presets-btn">Load Presets</button>
+                            <button type="button" class="js-submit-btn submit-btn">Submit Changes</button>
                         </div>
                     </form>
                 </div>
