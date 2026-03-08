@@ -72,8 +72,8 @@ function initializeDefaultGameState() {
     });
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
-    document.querySelector(".modal-container").addEventListener("click", (e) => {
-        if (e.target === (document.querySelector(".modal-container")))
+    document.querySelector("#modal-container").addEventListener("click", (e) => {
+        if (e.target === (document.querySelector("#modal-container")))
             closeSettingsModal();
     });
 

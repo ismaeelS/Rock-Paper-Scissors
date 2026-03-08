@@ -1,6 +1,53 @@
-.modal-container {
+@keyframes unfoldIn {
+    0% {
+        transform: scaleY(0.005) scaleX(0);
+    }
+
+    50% {
+        transform: scaleY(0.005) scaleX(1);
+    }
+
+    100% {
+        transform: scaleY(1) scaleX(1);
+    }
+}
+
+@keyframes unfoldOut {
+    0% {
+        transform: scaleY(1) scaleX(1);
+    }
+
+    50% {
+        transform: scaleY(0.005) scaleX(1);
+    }
+
+    100% {
+        transform: scaleY(0.005) scaleX(0);
+    }
+}
+
+@keyframes zoomIn {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes zoomOut {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(0);
+    }
+}
+
+#modal-container {
     position: fixed;
-    visibility: hidden;
 
     top: 0;
     left: 0;
@@ -10,16 +57,21 @@
     background-color: #1a1a1a;
     opacity: .9;
     border: .5rem solid wheat;
+
+    height: 100%;
+    width: 100%;
+    transform: scale(0);
+    z-index: 1;
 }
 
-.modal {
+.modal-background {
     position: absolute;
 
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 
-    width: 30%;
+    /* width: 30%; */
     max-width: 50%;
     max-height: 100%;
 
@@ -36,18 +88,41 @@
     padding: 0 3rem;
 }
 
-.modal h2 {
+.modal-background h2 {
     text-align: left;
 }
 
-.modal button {
+.modal-background button {
     user-select: none;
+}
+
+#modal-container.one {
+    transform: scaleY(0.01) scaleX(0);
+    animation: unfoldIn 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+#modal-container.one .modal-background .modal-content {
+    transform: scale(0);
+    animation: zoomIn 0.5s 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+#modal-container.one.out {
+    transform: scale(1);
+    animation: unfoldOut 1s 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+#modal-container.one.out .modal-background .modal-content {
+    animation: zoomOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+#modal-container.one.out .modal-background .modal-content {
+    animation: zoomOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
 .close-btn {
     position: absolute;
     top: 1rem;
-    right: 1rem;
+    right: 0rem;
 
     background: transparent;
     

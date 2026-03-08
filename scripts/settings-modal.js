@@ -1,3 +1,5 @@
+const modalContainerEle = document.querySelector("#modal-container");
+
 document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
     modalSettings.askBeforeRemove = e.target.checked;
     showNotification("success", "Setting Saved");
@@ -9,6 +11,9 @@ document.querySelector("#show-warnings").addEventListener("change", (e) => {
 });
 
 function openSettingsModal() {
+    modalContainerEle.removeAttribute("class");
+    modalContainerEle.classList.add("one");
+
     updateSettingsModal();
 
     //clear any existing file
@@ -18,18 +23,17 @@ function openSettingsModal() {
     document.querySelector(".button-settings").lastElementChild.scrollIntoView();
 
     settingsModalIsOpen = true;
-    document.querySelector(".modal-container").style.visibility = 'visible';
 }
 
 //ideally would have a check if there are unsaved values before allowing the modal to close
 function closeSettingsModal() {
+    modalContainerEle.classList.add("out");
     if (!objectValuesAreTheSame(modalSettings, settings) || !objectValuesAreTheSame(modalWeapons, weapons)) {
         showNotification("warning", "Button Edits Not Saved. Please Click Submit to Save Changes");
     }
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
     settingsModalIsOpen = false;
-    document.querySelector(".modal-container").style.visibility = 'hidden';
 }
 
 /**

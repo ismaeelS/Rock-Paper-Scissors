@@ -35,7 +35,13 @@
     animation: rotating 2s linear infinite;
 }
 
+html {
+    height: 100%;
+}
+
 body {
+    min-height: 100%;
+    
     background-color: #1a1a1a;
     text-align: center;
 
