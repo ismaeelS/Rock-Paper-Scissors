@@ -1,5 +1,5 @@
-// HALP SAVE ISAUTOPLAYING AND AUTOPLAY ON REFRESH IF TRUE
-
+// halp double check reset settings and reset all button notifs
+// halp check file validation
 const defaultWeapons = {
     rock: {
         beats: ["scissors"],
@@ -129,12 +129,13 @@ function initializeDefaultGameState() {
         showNotification("warning", "The File Will Attempt to Overwrite Current Settings. This Cannot Be Undone", e.target);
     });
     document.querySelector(".save-btn").addEventListener("click", () => {saveFile()});
+    document.querySelector(".js-presets-btn").addEventListener("click", () => {loadPresets()});
     document.querySelector(".js-submit-btn").addEventListener("click", () => {submitNewSettings()});
 
     document.querySelector(".js-autoplay-btn").addEventListener("click", () => {autoplayGame();});
     document.querySelector(".js-autoplay-btn").addEventListener("mouseenter", (e) => {
         if(!autoplaying) {
-            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves or Access the Settings", e.target);
+            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves", e.target);
         }
         else {
             showNotification("info", "Click Autoplay Again to End Autoplay", e.target);

@@ -277,27 +277,7 @@ function validateInputFile(fileData) {
         fileData["settings"]["shortcuts"] = ["?", "a"];
     }
 
-    const fileDataSettingsShortcuts = fileData["settings"]["shortcuts"].filter((shortcutFromFile) => 
-        shortcutFromFile.toLowerCase() !== shortcutFromFile.toUpperCase()
-    );
-    
-    const defaultShortcuts = ["?", "a"];
-
-    for (let i = 0; i < defaultShortcuts.length; i++) {
-        const currentSettingsShortcut = defaultShortcuts[i];
-
-        if (!fileDataSettingsShortcuts.includes(currentSettingsShortcut)) {
-            fileDataSettingsShortcuts.push(currentSettingsShortcut);
-        }
-    }
-
-    for (let i = 0; i < fileData["settings"]["shortcuts"].length; i++) {
-        const currentFileShortcut = fileData["settings"]["shortcuts"][i];
-
-        if (currentFileShortcut.length > 1) {
-            return `Shortcuts cannot be longer than one character.`;
-        }
-    }
+    //shortcuts handled with weapons later
     
     if (!fileData["settings"]["showWarnings"]) {
         fileData["settings"]["showWarnings"] = true;
@@ -307,35 +287,34 @@ function validateInputFile(fileData) {
         fileData["settings"]["showWarnings"] = true;
     }
 
-    // HALP NEED TO LATER GO THRU WEAPONS AND DISCARD ANY SHORTCUTS NOT ASSOCIATED TO A WEAPON
-
+    
     //score validation    
     const fileDataScoreKeys = Object.keys(fileData["score"]);
     const scoreKeys = Object.keys(score);
-
+    
     for (let i = 0; i < scoreKeys.length; i++) {
         const currentScoreKey = scoreKeys[i];
-
+        
         if (!fileDataScoreKeys.includes(currentScoreKey)) {
             fileData["score"][currentScoreKey] = 0;
         }
-
+        
         if (typeof fileData["score"][currentScoreKey] !== "number") {
             return `All score values need to be numbers ${currentScoreKey} is not a number`;
         }
-
+        
         if (fileData["score"][currentScoreKey] < 0) {
             return `${fileData["score"][currentScoreKey]} cannot be negative`
         }
     }
-
-    //weapon validation
+    
+    //weapon validation and settings shortcuts from weapons
     const fileDataWeapons = Object.keys(fileData["weapons"]);
-
+    
     if (fileDataWeapons.length < 1) {
         return "Weapons must contain at least one entry";
     }
-
+    
     //check duplicate weapon names
     const trackUniqueNames = [];
     //take care of misformatted weapon names
@@ -363,6 +342,8 @@ function validateInputFile(fileData) {
         }
     }
 
+    const fileWeaponsShortcuts = ["?", "a"];
+
     Object.keys(fileData["weapons"]).forEach((weaponToCheck) => {
         //if current key is the misnamed weapon, replace the whole key
         if (Object.keys(weaponsExchange).includes(weaponToCheck)) {
@@ -382,7 +363,16 @@ function validateInputFile(fileData) {
                 fileData["weapons"][formatWeaponName(weaponToCheck)]["ties"][indexOfTiedWeapon] = weaponsExchange[misnamedWeapon];   
             }
         });
+
+        //if shorcut exists, is a letter, 1 char, and not already added
+        if (fileData["weapons"]["shortcut"] && 
+            (fileData["weapons"]["shortcut"].toLowerCase() !== fileData["weapons"]["shortcut"]).toUpperCase() && 
+            fileData["weapons"]["shortcut"].length === 1 &&!fileWeaponsShortcuts.includes(fileData["weapons"]["shortcut"])) {
+            fileWeaponsShortcuts.push(fileData["weapons"]["shortcut"]);
+        }
     });
+
+    fileData["settings"]["shorcuts"] = fileWeaponsShortcuts;
 
     const weaponConflict = weaponsHaveConflicts(fileData["weapons"]);
 
@@ -456,6 +446,34 @@ function saveFile() {
     a.download = "rockpaperscissors_savefile.json";
     a.click();
     URL.revokeObjectURL(a.href);
+}
+
+//ideally UI would not use prompt
+function loadPresets() {
+    const selectedPreset = prompt("Enter 1, 2 or 3");
+    
+    const acceptableInputs = ["1","2","3"];
+
+    if (acceptableInputs.includes(selectedPreset)) {
+        switch (selectedPreset) {
+            case "1":
+                modalSettings = {"autoplayInterval":2000,"shortcuts":["?","a","r","p","s","w"],"askBeforeRemove":true,"showWarnings":false};
+                modalWeapons = {"rock":{"beats":["scissors"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","well"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper"],"ties":[],"shortcut":"s","button":{}},"well":{"beats":["rock","scissors"],"ties":[],"shortcut":"w","button":{}}};
+                break;
+            case "2":
+                modalSettings = {"autoplayInterval":2000,"shortcuts":["?","a","r","p","s","k","l"],"askBeforeRemove":true,"showWarnings":false};
+                modalWeapons = {"rock":{"beats":["scissors","lizard"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","spock"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","lizard"],"ties":[],"shortcut":"s","button":{}},"spock":{"beats":["rock","scissors"],"ties":[],"shortcut":"k","button":{}},"lizard":{"beats":["paper","spock"],"ties":[],"shortcut":"l","button":{}}};
+                break;
+            case "3":
+                modalSettings = {"autoplayInterval":2000,"shortcuts":["?","a","r","p","s","f","w"],"askBeforeRemove":true,"showWarnings":false};
+                modalWeapons = {"rock":{"beats":["scissors","water"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","water"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","water"],"ties":[],"shortcut":"s","button":{}},"fire":{"beats":["rock","paper","scissors"],"ties":[],"shortcut":"f","button":{}},"water":{"beats":["fire"],"ties":[],"shortcut":"w","button":{}}};
+                break;
+            default:
+                break;
+        }
+
+        updateSettingsModal();
+    }
 }
 
 //ideally would check if there are any form changes. if not then, would not execute

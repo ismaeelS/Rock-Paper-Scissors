@@ -206,11 +206,11 @@ select {
 
 .remove-btn {
     width: 20%;
-    background: #c82333;
+    background: wheat;
     border: .5rem solid #c42837;
     border-radius: .25rem;
 
-    color: #1a1a1a;
+    color: #c82333;
     
     font-size: 1.25rem;
 }
@@ -230,17 +230,17 @@ select {
 }
 
 .undo-restore-btn {
-    background: #4d7eb3;
-    border: .5rem solid #537eac;
+    background: wheat;
+    border: .25rem solid #537eac;
     border-radius: .25rem;
 
-    color: #1a1a1a;
+    color: #4d7eb3;
     font-weight: bold;
 }
 
 .undo-restore-btn:hover {
     background: #53789f;
-    border: .5rem solid #5a799b;
+    border: .25rem solid #5a799b;
 
     color: wheat;
 }
@@ -279,6 +279,22 @@ select {
 
     margin-top: 1rem;
     margin-bottom: 1rem;
+}
+
+.presets-btn {
+    color: #1a1a1a;
+    background: #948FE3;
+    border: .5rem solid #8e89d9;
+    border-radius: .25rem;
+
+    font-weight: bold;
+}
+
+.presets-btn:hover {
+    background: #948FE3;
+    border: .5rem solid #948FE346;
+
+    color: wheat;
 }
 
 .submit-btn {

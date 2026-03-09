@@ -1,1 +1,1 @@
-const imageNames = ["random", "rock", "paper", "scissors", "water", "fire", "lizard", "spock", "man", "woman", "gun", "cat", "dog", "time", "beepboop", "m", "w", "uncreative"];
+const imageNames = ["random", "rock", "paper", "scissors", "well", "water", "fire", "lizard", "spock", "man", "woman", "gun", "cat", "dog", "time", "beepboop", "m", "w", "uncreative"];
