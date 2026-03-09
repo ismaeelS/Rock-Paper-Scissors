@@ -12,7 +12,7 @@ document.querySelector("#show-warnings").addEventListener("change", (e) => {
 
 function openSettingsModal() {
     modalContainerEle.removeAttribute("class");
-    modalContainerEle.classList.add("one");
+    modalContainerEle.classList.add("fold-animation");
 
     updateSettingsModal();
 

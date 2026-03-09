@@ -1,3 +1,5 @@
+// HALP SAVE ISAUTOPLAYING AND AUTOPLAY ON REFRESH IF TRUE
+
 const defaultWeapons = {
     rock: {
         beats: ["scissors"],
@@ -20,7 +22,7 @@ let defaultSettings = {
     autoplayInterval: 2000,
     shortcuts: ["?", "a", "x"],
     askBeforeRemove: true,
-    showWarnings: true,
+    showWarnings: false,
 };
 
 // import score from local storage if available or initialize a score starting at 0-0-0
@@ -66,9 +68,7 @@ function initializeDefaultGameState() {
         }
     });
     document.querySelector(".js-plus-btn").addEventListener("click", (e) => {
-        if(!autoplaying) {
-            document.querySelector(".js-button-holder").classList.toggle("keep-rotating");
-        }
+        document.querySelector(".js-button-holder").classList.toggle("keep-rotating");
     });
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
@@ -275,7 +275,8 @@ function autoplayGame() {
             });
         }, settings.autoplayInterval);
 
-    autoplaying = true;
+        document.querySelector(".js-autoplay-btn").classList.add("rotating-border");
+        autoplaying = true;
     }
     else {
         Object.keys(weapons).forEach(weapon => {
@@ -283,6 +284,7 @@ function autoplayGame() {
         });
         
         clearInterval(intervalId);
+        document.querySelector(".js-autoplay-btn").classList.remove("rotating-border");
         autoplaying = false;
     }
 }

@@ -96,26 +96,26 @@
     user-select: none;
 }
 
-#modal-container.one {
+#modal-container.fold-animation {
     transform: scaleY(0.01) scaleX(0);
     animation: unfoldIn 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
-#modal-container.one .modal-background .modal-content {
+#modal-container.fold-animation .modal-background .modal-content {
     transform: scale(0);
     animation: zoomIn 0.5s 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
-#modal-container.one.out {
+#modal-container.fold-animation.out {
     transform: scale(1);
     animation: unfoldOut 1s 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
-#modal-container.one.out .modal-background .modal-content {
+#modal-container.fold-animation.out .modal-background .modal-content {
     animation: zoomOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
-#modal-container.one.out .modal-background .modal-content {
+#modal-container.fold-animation.out .modal-background .modal-content {
     animation: zoomOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 

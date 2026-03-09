@@ -143,6 +143,32 @@ button {
     margin-bottom: 1rem;
 }
 
+.autoplay-btn.rotating-border {
+    color: #1a1a1a;
+    
+    border: .5rem solid #0000;
+
+    background: linear-gradient(#1a1a1a, wheat) padding-box, linear-gradient(
+        var(--angle),
+        #1a1a1a,
+        wheat
+    ) border-box;
+
+    animation: 1s rotate linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 .autoplay-btn:hover {
     background-color: #696969;
 }
