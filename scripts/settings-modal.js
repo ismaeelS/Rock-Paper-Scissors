@@ -22,17 +22,23 @@ function openSettingsModal() {
     //scroll to the most recently created button when settings is opened
     document.querySelector(".button-settings").lastElementChild.scrollIntoView();
 
+    //allow the user to see all buttons in the background
+    document.querySelector(".js-button-holder").classList.remove("restrict-button-holder");
     settingsModalIsOpen = true;
 }
 
 //ideally would have a check if there are unsaved values before allowing the modal to close
 function closeSettingsModal() {
     modalContainerEle.classList.add("out");
+    
     if (!objectValuesAreTheSame(modalSettings, settings) || !objectValuesAreTheSame(modalWeapons, weapons)) {
         showNotification("warning", "Button Edits Not Saved. Please Click Submit to Save Changes");
     }
+    
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
+    //restrict the view of all buttons again
+    document.querySelector(".js-button-holder").classList.add("restrict-button-holder");
     settingsModalIsOpen = false;
 }
 
@@ -44,21 +50,27 @@ function closeSettingsModal() {
  */
 function addWeaponToSettings() {
     // HALP REPLACE THE ADD WEAPON BUTTON WITH INPUT THAT TAKES A BUTTON NAME
-    let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
-    if (!newWeaponName) return;
+    //limit it to 20 buttons, ideally dynamically allow resizing and more
+    if (modalWeapons.length < 21) {
+        let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
+        if (!newWeaponName) return;
 
-    newWeaponName = formatWeaponName(newWeaponName);
+        newWeaponName = formatWeaponName(newWeaponName);
 
-    if (Object.keys(modalWeapons).includes(newWeaponName)) {
-        showNotification("error", "This Button Already Exists");
-        return;
+        if (Object.keys(modalWeapons).includes(newWeaponName)) {
+            showNotification("error", "This Button Already Exists");
+            return;
+        }
+        else if (newWeaponName === "uncreative") {
+            showNotification("info", "Uncreative Weapon Name :[");
+        }
+
+        modalWeapons[newWeaponName] = {};
+        modalWeapons[newWeaponName]["beats"] = [];
+        modalWeapons[newWeaponName]["ties"] = [];
+
+        updateSettingsModal();
     }
-
-    modalWeapons[newWeaponName] = {};
-    modalWeapons[newWeaponName]["beats"] = [];
-    modalWeapons[newWeaponName]["ties"] = [];
-
-    updateSettingsModal();
 }
 
 function formatWeaponName(attemptedWeaponName) {

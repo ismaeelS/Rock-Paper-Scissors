@@ -19,13 +19,13 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
         activeNotifications.push(thisMessageID);
     }
 
-    //disable the button temporarily so user can see the warning
+    //disable the button temporarily warning may prevent action
     if (buttonElement) {
         buttonElement.disabled = true;
         
         setTimeout(() => {
             buttonElement.disabled = false;
-        }, 500);
+        }, 300);
     }
 
     const notification = document.createElement("div");

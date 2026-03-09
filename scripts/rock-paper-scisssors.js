@@ -67,8 +67,16 @@ function initializeDefaultGameState() {
             openSettingsModal();
         }
     });
-    document.querySelector(".js-plus-btn").addEventListener("click", (e) => {
-        document.querySelector(".js-button-holder").classList.toggle("keep-rotating");
+    document.querySelector(".js-gear-icon").addEventListener("mouseenter", () => {
+        if(autoplaying) {
+            showNotification("info", "Stop Autoplaying to Edit Settings");
+        }
+    });
+
+    document.querySelector(".js-plus-btn").addEventListener("click", () => {
+        const buttonHolderElem = document.querySelector(".js-button-holder");
+        buttonHolderElem.classList.toggle("keep-rotating");
+        buttonHolderElem.classList.toggle("restrict-button-holder");
     });
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
@@ -291,7 +299,7 @@ function autoplayGame() {
 
 function playOneRound(selectedPlayerWeapon) {
     if (!settingsModalIsOpen) {
-        const computerWeapon = chooseRandomWeapon()
+        const computerWeapon = chooseRandomWeapon();
 
         let roundResultMessage = "";
 

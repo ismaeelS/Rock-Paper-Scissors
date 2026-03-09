@@ -107,6 +107,11 @@ button {
     justify-content: space-evenly;
 }
 
+.restrict-button-holder {
+    max-height: 30rem;
+    overflow-y: auto;
+}
+
 .move-btn {
     flex: 1 0 22rem;
     margin: 2rem;
@@ -132,20 +137,19 @@ button {
 }
 
 .autoplay-btn {
-    height: 6rem;
-    width: 10rem;
+    height: 5rem;
+    width: 9rem;
 
     border-radius: 3rem;
 
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     user-select: none;
-
-    margin-bottom: 1rem;
 }
 
+/* https://www.letsbuildui.dev/articles/how-to-animate-borders-in-css/ */
 .autoplay-btn.rotating-border {
     color: #1a1a1a;
-    
+
     border: .5rem solid #0000;
 
     background: linear-gradient(#1a1a1a, wheat) padding-box, linear-gradient(
@@ -174,7 +178,7 @@ button {
 }
 
 .results-text, .score-text {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
 }
 
 .reset-score-btn {
@@ -184,8 +188,7 @@ button {
     font-size: 1rem;
     user-select: none;
 
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .reset-score-btn:hover {
