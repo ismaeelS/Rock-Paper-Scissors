@@ -96,6 +96,7 @@
     user-select: none;
 }
 
+/* https://gosnippets.com/snippets/bootstrap-modal-animations-snippet */
 #modal-container.fold-animation {
     transform: scaleY(0.01) scaleX(0);
     animation: unfoldIn 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;

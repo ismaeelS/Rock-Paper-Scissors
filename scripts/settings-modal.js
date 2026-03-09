@@ -38,7 +38,11 @@ function closeSettingsModal() {
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
     //restrict the view of all buttons again
-    document.querySelector(".js-button-holder").classList.add("restrict-button-holder");
+    const buttonHolderElem = document.querySelector(".js-button-holder");
+
+    if (!buttonHolderElem.classList.contains("keep-rotating")) {
+        buttonHolderElem.classList.add("restrict-button-holder");
+    }
     settingsModalIsOpen = false;
 }
 
@@ -49,9 +53,8 @@ function closeSettingsModal() {
  * otherwise add the new weapon to the modal weapons
  */
 function addWeaponToSettings() {
-    // HALP REPLACE THE ADD WEAPON BUTTON WITH INPUT THAT TAKES A BUTTON NAME
-    //limit it to 20 buttons, ideally dynamically allow resizing and more
-    if (modalWeapons.length < 21) {
+    //limit buttons to the number of letters (case if every button has a shortcut + a for autoplay)
+    if (Object.keys(modalWeapons).length < 25) {
         let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
         if (!newWeaponName) return;
 
@@ -70,6 +73,9 @@ function addWeaponToSettings() {
         modalWeapons[newWeaponName]["ties"] = [];
 
         updateSettingsModal();
+    }
+    else {
+        showNotification("error", "Maximum Number of Buttons Reached");
     }
 }
 
@@ -126,11 +132,9 @@ function restoreDefaultSettings() {
         setupWeaponButtonListeners();
         updateSettingsModal();
 
-        showNotification("success", "Default Settings Have Been Restored");
+        return true;
     }
-    else {
-        showNotification("info", "Settings are Currently the Default");
-    }
+    return false;
 }
 
 // credits to https://www.youtube.com/watch?v=8s3u656gpkk
@@ -270,11 +274,14 @@ function validateInputFile(fileData) {
     }
     
     if (!fileData["settings"]["shortcuts"]) {
-        fileData["settings"]["shortcuts"] = ["?", "a", "x"];
+        fileData["settings"]["shortcuts"] = ["?", "a"];
     }
 
-    const fileDataSettingsShortcuts = fileData["settings"]["shortcuts"];
-    const defaultShortcuts = ["?", "a", "x"];
+    const fileDataSettingsShortcuts = fileData["settings"]["shortcuts"].filter((shortcutFromFile) => 
+        shortcutFromFile.toLowerCase() !== shortcutFromFile.toUpperCase()
+    );
+    
+    const defaultShortcuts = ["?", "a"];
 
     for (let i = 0; i < defaultShortcuts.length; i++) {
         const currentSettingsShortcut = defaultShortcuts[i];
@@ -299,6 +306,8 @@ function validateInputFile(fileData) {
     if (typeof fileData["settings"]["showWarnings"] !== "boolean") {
         fileData["settings"]["showWarnings"] = true;
     }
+
+    // HALP NEED TO LATER GO THRU WEAPONS AND DISCARD ANY SHORTCUTS NOT ASSOCIATED TO A WEAPON
 
     //score validation    
     const fileDataScoreKeys = Object.keys(fileData["score"]);
@@ -454,7 +463,7 @@ function submitNewSettings() {
     modalWeapons = {};
     modalSettings = {
         autoplayInterval: Number(document.querySelector("#autoplay-interval").value)*1000,
-        shortcuts: ["?", "a", "x"],
+        shortcuts: ["?", "a"],
         askBeforeRemove: document.querySelector("#ask-before-remove").checked,
         showWarnings: document.querySelector("#show-warnings").checked,
     };
@@ -491,6 +500,11 @@ function submitNewSettings() {
         if (currentWeaponShortcut) {
             if (modalSettings["shortcuts"].includes(currentWeaponShortcut)) {
                 showNotification("error", "This Shortcut Already Exists. Shortcut Will Not be Saved");
+
+                return;
+            }
+            else if (currentWeaponShortcut.toLowerCase() === currentWeaponShortcut.toUpperCase()) {
+                showNotification("error", `Shortcuts must be valid letters. ${currentWeaponName} cannot use "${currentWeaponShortcut}"`);
 
                 return;
             }

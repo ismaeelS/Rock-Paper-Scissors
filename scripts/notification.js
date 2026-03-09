@@ -36,7 +36,9 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
     notificationContainer.appendChild(notification);
 
     setTimeout(() => {
-        activeNotifications = activeNotifications.filter((messageID) => messageID!==thisMessageID);
+        //remove all instances of this message
+        activeNotifications = activeNotifications.filter((messageID) => messageID !== thisMessageID);
+        //remove the notification from view
         notification.remove();
     }, secondsVisible*1000);
 }

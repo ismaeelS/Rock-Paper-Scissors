@@ -20,7 +20,7 @@ const defaultWeapons = {
 
 let defaultSettings = {
     autoplayInterval: 2000,
-    shortcuts: ["?", "a", "x"],
+    shortcuts: ["?", "a"],
     askBeforeRemove: true,
     showWarnings: false,
 };
@@ -61,22 +61,21 @@ function initializeDefaultGameState() {
 
     //set up listeners for the settings modal, the autoplay button, and the reset button
     document.querySelector(".js-gear-icon").addEventListener("click", (e) => {
-        if(!autoplaying) {
-            e.target.classList.add("keep-rotating");
+        e.target.classList.add("keep-rotating");
 
-            openSettingsModal();
-        }
-    });
-    document.querySelector(".js-gear-icon").addEventListener("mouseenter", () => {
-        if(autoplaying) {
-            showNotification("info", "Stop Autoplaying to Edit Settings");
-        }
+        openSettingsModal();
     });
 
     document.querySelector(".js-plus-btn").addEventListener("click", () => {
         const buttonHolderElem = document.querySelector(".js-button-holder");
         buttonHolderElem.classList.toggle("keep-rotating");
-        buttonHolderElem.classList.toggle("restrict-button-holder");
+
+        if (buttonHolderElem.classList.contains("restrict-button-holder")) {
+            buttonHolderElem.classList.remove("restrict-button-holder");
+        }
+        else {
+            buttonHolderElem.classList.add("restrict-button-holder");
+        }
     });
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
@@ -88,15 +87,39 @@ function initializeDefaultGameState() {
     document.querySelector(".js-add-btn").addEventListener("click", () => {addWeaponToSettings();});
     
     document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {undoSettingsChanges();});
-    document.querySelector(".js-modal-reset-score-btn").addEventListener("click", () => {resetScore();});
+    document.querySelector(".js-modal-reset-score-btn").addEventListener("click", () => {
+        if (resetScore()) {
+            showNotification("success", "Score Has Been Reset");
+        }
+        else {
+            showNotification("info", "The Score is already 0-0-0");
+        }
+    });
     document.querySelector(".js-modal-reset-score-btn").addEventListener("mouseenter", (e) => {
         showNotification("warning", "Score History Will Be Reset. Buttons Will Not Be Affected", e.target);
     });
-    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {restoreDefaultSettings()});
+    document.querySelector(".js-settings-restore-btn").addEventListener("click", () => {
+        if (restoreDefaultSettings()) {
+            showNotification("success", "Default Settings Have Been Restored");
+        }
+        else {
+            showNotification("info", "Settings are Currently the Default");
+        }
+    });
     document.querySelector(".js-settings-restore-btn").addEventListener("mouseenter", (e) => {        
         showNotification("warning", "All Settings Will Be Reset. Score Will Not Be Affected", e.target);
     });
-    document.querySelector(".js-reset-all-btn").addEventListener("click", () => {resetScore(); restoreDefaultSettings()});
+    document.querySelector(".js-reset-all-btn").addEventListener("click", () => {
+        const ableToResetScore = resetScore();
+        const ableToResetSettings = restoreDefaultSettings();
+
+        if (!ableToResetScore && !ableToResetSettings) {
+            showNotification("info", "Setting Are Already Default and the Score is already 0-0-0")
+        }
+        else {
+            showNotification("success", "Default Settings Have Been Restored and the Score is Reset")
+        }
+    });
     document.querySelector(".js-reset-all-btn").addEventListener("mouseenter", (e) => {        
         showNotification("warning", "All Score Data and Settings Will Be Reset", e.target);
     });
@@ -117,7 +140,14 @@ function initializeDefaultGameState() {
             showNotification("info", "Click Autoplay Again to End Autoplay", e.target);
         }
     });
-    document.querySelector(".js-reset-score-btn").addEventListener("click", () => {resetScore();});
+    document.querySelector(".js-reset-score-btn").addEventListener("click", () => {
+        if (resetScore()) {
+            showNotification("success", "Score Has Been Reset");
+        }
+        else {
+            showNotification("info", "The Score is already 0-0-0");
+        }
+    });
     document.querySelector(".js-reset-score-btn").addEventListener("mouseenter", (e) => {
         showNotification("warning", "All Score Data Will Be Reset. Buttons Will Not Be Affected", e.target, 5);
     });
@@ -177,18 +207,28 @@ function setupWeaponButtonListeners() {
     document.addEventListener("keyup", function(event) {
         const keyPressed = event.key.toLowerCase();
 
-        if (!settingsModalIsOpen) {
-            if (keyPressed === "?") {
-                playOneRound(chooseRandomWeapon());
+        // when the modal is open, allow for the following keyboard instructions
+        if (settingsModalIsOpen) {
+            if (keyPressed == "escape") {
+                closeSettingsModal();
             }
-            else if (keyPressed === "a") {
+            else if (keyPressed == "enter") {
+                submitNewSettings();
+            }
+        }
+        else {
+            if (keyPressed === "a") {
                 autoplayGame();
             }
-            else if (autoplaying || !settings["shortcuts"].includes(keyPressed)) {
+            else if (keyPressed === "?") {
+                playOneRound(chooseRandomWeapon());
+            }
+            //if the pressed key is longer than one char (alt, control, escape, etc) or is not a letter
+            else if (keyPressed.length > 1 || keyPressed.toLowerCase() === keyPressed.toUpperCase()) {
                 ;
             }
-            else if (keyPressed === "x") {
-                resetScore();
+            else if (!settings["shortcuts"].includes(keyPressed)) {
+                showNotification("info", `The following key is not assigned: ${keyPressed}`);
             }
             //if the pressed key is recognized by the settings object as a valid shortcut, play the weapon
             else {
@@ -197,15 +237,6 @@ function setupWeaponButtonListeners() {
                         playOneRound(weapon);
                     }
                 });
-            }
-        }
-        // when the modal is open, allow for the following keyboard instructions
-        else {
-            if (keyPressed == "escape") {
-                closeSettingsModal();
-            }
-            else if (keyPressed == "enter") {
-                submitNewSettings();
             }
         }
     });
@@ -298,45 +329,43 @@ function autoplayGame() {
 }
 
 function playOneRound(selectedPlayerWeapon) {
-    if (!settingsModalIsOpen) {
-        const computerWeapon = chooseRandomWeapon();
+    const computerWeapon = chooseRandomWeapon();
 
-        let roundResultMessage = "";
+    let roundResultMessage = "";
 
-        resetColors();
+    resetColors();
 
-        if (selectedPlayerWeapon === computerWeapon || weapons[selectedPlayerWeapon]["ties"].includes(computerWeapon)) {
-            roundResultMessage = "You Tie"
-            score.ties++;
-        }
-        else if (weapons[selectedPlayerWeapon]["beats"].includes(computerWeapon)) {
-            roundResultMessage = "You Win"
-            score.wins++;
-            
-            pageTitle.classList.add("turn-text-green");
-            resultsParagraph.classList.add("turn-text-green");
-            weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-green");
-        }
-        else {
-            roundResultMessage = "You Lose"
-            score.losses++;
-            
-            pageTitle.classList.add("turn-text-red");
-            resultsParagraph.classList.add("turn-text-red");
-            weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-red");   
-        }
-
-        document.querySelector(".js-round-picks").innerHTML = 
-            `You played ${selectedPlayerWeapon} and the computer played ${computerWeapon}`;
-        
-        document.querySelector(".js-round-result").innerHTML = roundResultMessage;
-
-        localStorage.setItem("score", JSON.stringify(score));
-
-        updateScoreboard();
-
-        return [selectedPlayerWeapon, computerWeapon];
+    if (selectedPlayerWeapon === computerWeapon || weapons[selectedPlayerWeapon]["ties"].includes(computerWeapon)) {
+        roundResultMessage = "You Tie"
+        score.ties++;
     }
+    else if (weapons[selectedPlayerWeapon]["beats"].includes(computerWeapon)) {
+        roundResultMessage = "You Win"
+        score.wins++;
+        
+        pageTitle.classList.add("turn-text-green");
+        resultsParagraph.classList.add("turn-text-green");
+        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-green");
+    }
+    else {
+        roundResultMessage = "You Lose"
+        score.losses++;
+        
+        pageTitle.classList.add("turn-text-red");
+        resultsParagraph.classList.add("turn-text-red");
+        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-red");   
+    }
+
+    document.querySelector(".js-round-picks").innerHTML = 
+        `You played ${selectedPlayerWeapon} and the computer played ${computerWeapon}`;
+    
+    document.querySelector(".js-round-result").innerHTML = roundResultMessage;
+
+    localStorage.setItem("score", JSON.stringify(score));
+
+    updateScoreboard();
+
+    return [selectedPlayerWeapon, computerWeapon];
 }
 
 /**
@@ -360,8 +389,10 @@ function resetScore() {
 
         updateScoreboard();
 
-        showNotification("success", "Score Has Been Reset");
+        return true;
     }
+    
+    return false;
 }
 
 /**
