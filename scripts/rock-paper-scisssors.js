@@ -1,5 +1,3 @@
-// halp double check reset settings and reset all button notifs
-// halp check file validation
 const defaultWeapons = {
     rock: {
         beats: ["scissors"],

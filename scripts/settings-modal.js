@@ -31,7 +31,7 @@ function closeSettingsModal() {
     modalContainerEle.classList.add("out");
     
     if (!objectValuesAreTheSame(modalSettings, settings) || !objectValuesAreTheSame(modalWeapons, weapons)) {
-        showNotification("warning", "Button Edits Not Saved. Please Click Submit to Save Changes");
+        showNotification("info", "Button Edits Not Saved. Please Click Submit to Save Changes");
     }
     
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
@@ -115,8 +115,14 @@ function undoSettingsChanges() {
 }
 
 function restoreDefaultSettings() {
+    console.log("in restore default settings");
+
+    console.log(objectValuesAreTheSame(modalWeapons, defaultWeapons));
+    console.log(objectValuesAreTheSame(modalSettings, defaultSettings));
+
     if (!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings)) {
         
+        console.log("there is a difference found");
         weapons = JSON.parse(JSON.stringify(defaultWeapons));
         settings = JSON.parse(JSON.stringify(defaultSettings));
 
@@ -217,6 +223,7 @@ async function checkAndUseFile(event) {
     document.querySelector("#file-input").value = null;
 }
 
+//HALP THIS FUNCTION NEEDS TO BE CLEANED UP WITH A LOT OF THE HEAVY LIFTING NOT HAVING TO BE DONE HERE BECAUSE THE MODAL HAS CHECKS ON SUBMIT
 function validateInputFile(fileData) {
     if (fileData === "") {
         return "File is empty"
@@ -240,6 +247,8 @@ function validateInputFile(fileData) {
         return `This file does not contain any of the following as base keys: ${gameKeys}`
     }
 
+    console.log(fileData);
+
     //settings validation
     const fileDataSettingsKeys = Object.keys(fileData["settings"]);
     const settingsKeys = Object.keys(settings);
@@ -255,6 +264,8 @@ function validateInputFile(fileData) {
     if (!fileData["settings"]["askBeforeRemove"]) {
         fileData["settings"]["askBeforeRemove"] = true;
     }
+
+    console.log(["settings"]["askBeforeRemove"]);
 
     if (typeof fileData["settings"]["askBeforeRemove"] !== "boolean") {
         fileData["settings"]["askBeforeRemove"] = true;
@@ -367,7 +378,7 @@ function validateInputFile(fileData) {
         }
     });
 
-    fileData["settings"]["shorcuts"] = fileWeaponsShortcuts;
+    fileData["settings"]["shortcuts"] = fileWeaponsShortcuts;
 
     const weaponConflict = weaponsHaveConflicts(fileData["weapons"]);
 
@@ -434,11 +445,12 @@ function weaponsHaveConflicts(arsenal) {
 
 function saveFile() {
     const dataToSave = JSON.stringify({score: score, settings: settings, weapons: weapons});
+    const fileNamePrefix = Object.keys(weapons).map(currentWeaponName => currentWeaponName[0]).join("");
 
     var a = document.createElement("a");
     var file = new Blob([dataToSave], {type: "application/json"});
     a.href = URL.createObjectURL(file);
-    a.download = "rockpaperscissors_savefile.json";
+    a.download = `${fileNamePrefix}_save.json`;
     a.click();
     URL.revokeObjectURL(a.href);
 }
