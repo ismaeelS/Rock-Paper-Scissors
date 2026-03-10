@@ -6,7 +6,7 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
     const notificationContainer = document.querySelector(".notification-container");
     
     // if warnings are turned off, do not show the notification
-    if (messageType === "warning" && !settings.showWarnings) {
+    if (messageType === "warning" && !modalSettings.showWarnings) {
         return;
     }
 

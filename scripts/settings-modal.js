@@ -6,7 +6,6 @@ document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
 });
 document.querySelector("#show-warnings").addEventListener("change", (e) => {
     modalSettings.showWarnings = e.target.checked;
-    settings.showWarnings = e.target.checked;
     showNotification("success", "Setting Saved");
 });
 
@@ -37,12 +36,8 @@ function closeSettingsModal() {
     
     document.querySelector(".js-gear-icon").classList.remove("keep-rotating");
 
-    //restrict the view of all buttons again
-    const buttonHolderElem = document.querySelector(".js-button-holder");
+    updateButtonHolder();
 
-    if (!buttonHolderElem.classList.contains("keep-rotating")) {
-        buttonHolderElem.classList.add("restrict-button-holder");
-    }
     settingsModalIsOpen = false;
 }
 

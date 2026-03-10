@@ -67,15 +67,9 @@ function initializeDefaultGameState() {
     });
 
     document.querySelector(".js-plus-btn").addEventListener("click", () => {
-        const buttonHolderElem = document.querySelector(".js-button-holder");
-        buttonHolderElem.classList.toggle("keep-rotating");
+        document.querySelector(".js-button-holder").classList.toggle("keep-rotating");
 
-        if (buttonHolderElem.classList.contains("restrict-button-holder")) {
-            buttonHolderElem.classList.remove("restrict-button-holder");
-        }
-        else {
-            buttonHolderElem.classList.add("restrict-button-holder");
-        }
+        updateButtonHolder();
     });
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
@@ -156,6 +150,7 @@ function initializeDefaultGameState() {
     setupWeaponButtonListeners();
 
     updateScoreboard();
+    updateButtonHolder();
     updateSettingsModal();
 }
 
@@ -256,6 +251,18 @@ function setButtonBackground(buttonElement, weaponName, clearBackground=false) {
     buttonElement.style.backgroundImage = (clearBackground) ? "" : `url("images/${imageNames.includes(weaponName) ? weaponName : "unknown"}.jpg")`;
 }
 
+function updateButtonHolder() {
+    const buttonHolderElem = document.querySelector(".js-button-holder");
+    const roundsPlayed = score.wins+score.ties+score.losses;
+
+    if (!roundsPlayed || buttonHolderElem.classList.contains("keep-rotating")) {
+        document.querySelector(".js-button-holder").classList.remove("restrict-button-holder");
+    }
+    else {
+        document.querySelector(".js-button-holder").classList.add("restrict-button-holder");
+    }
+}
+
 /**
  * Update the webelements with the current scores and set the win rate text color to match success this game
  */
@@ -282,6 +289,8 @@ function updateScoreboard() {
 
     //hide the reset button if there are no rounds to reset
     document.querySelector(".js-reset-score-btn").style.visibility = (roundsPlayed) ? "visible": "hidden";
+    
+    updateButtonHolder();
 
     modalScore = JSON.parse(JSON.stringify(score));
 }
