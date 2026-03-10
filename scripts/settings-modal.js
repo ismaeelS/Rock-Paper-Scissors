@@ -115,14 +115,7 @@ function undoSettingsChanges() {
 }
 
 function restoreDefaultSettings() {
-    console.log("in restore default settings");
-
-    console.log(objectValuesAreTheSame(modalWeapons, defaultWeapons));
-    console.log(objectValuesAreTheSame(modalSettings, defaultSettings));
-
     if (!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings)) {
-        
-        console.log("there is a difference found");
         weapons = JSON.parse(JSON.stringify(defaultWeapons));
         settings = JSON.parse(JSON.stringify(defaultSettings));
 
@@ -247,8 +240,6 @@ function validateInputFile(fileData) {
         return `This file does not contain any of the following as base keys: ${gameKeys}`
     }
 
-    console.log(fileData);
-
     //settings validation
     const fileDataSettingsKeys = Object.keys(fileData["settings"]);
     const settingsKeys = Object.keys(settings);
@@ -264,8 +255,6 @@ function validateInputFile(fileData) {
     if (!fileData["settings"]["askBeforeRemove"]) {
         fileData["settings"]["askBeforeRemove"] = true;
     }
-
-    console.log(["settings"]["askBeforeRemove"]);
 
     if (typeof fileData["settings"]["askBeforeRemove"] !== "boolean") {
         fileData["settings"]["askBeforeRemove"] = true;
