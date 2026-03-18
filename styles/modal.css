@@ -206,7 +206,7 @@ select {
 
 .remove-btn {
     width: 20%;
-    background: wheat;
+    background: #f0cca7;
     border: .5rem solid #c42837;
     border-radius: .25rem;
 
@@ -230,7 +230,7 @@ select {
 }
 
 .undo-restore-btn {
-    background: wheat;
+    background: #e5d4b2;
     border: .25rem solid #537eac;
     border-radius: .25rem;
 
