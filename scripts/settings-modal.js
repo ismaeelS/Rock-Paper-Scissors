@@ -2,10 +2,12 @@ const modalContainerEle = document.querySelector("#modal-container");
 
 document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
     modalSettings.askBeforeRemove = e.target.checked;
+    settings.askBeforeRemove = e.target.checked;
     showNotification("success", "Setting Saved");
 });
 document.querySelector("#show-warnings").addEventListener("change", (e) => {
     modalSettings.showWarnings = e.target.checked;
+    settings.showWarnings = e.target.checked;
     showNotification("success", "Setting Saved");
 });
 
@@ -436,10 +438,10 @@ function saveFile() {
     const dataToSave = JSON.stringify({score: score, settings: settings, weapons: weapons});
     const fileNamePrefix = Object.keys(weapons).map(currentWeaponName => currentWeaponName[0]).join("");
 
-    var a = document.createElement("a");
-    var file = new Blob([dataToSave], {type: "application/json"});
+    const a = document.createElement("a");
+    const file = new Blob([dataToSave], {type: "application/json"});
     a.href = URL.createObjectURL(file);
-    a.download = `${fileNamePrefix}_save.json`;
+    a.download = `${fileNamePrefix}_save_file.json`;
     a.click();
     URL.revokeObjectURL(a.href);
 }
@@ -453,15 +455,18 @@ function loadPresets() {
     if (acceptableInputs.includes(selectedPreset)) {
         switch (selectedPreset) {
             case "1":
-                modalSettings = {"autoplayInterval":2000,"shortcuts":["?","a","r","p","s","w"],"askBeforeRemove":true,"showWarnings":false};
+                modalSettings.shortcuts = ["?","a","r","p","s","w"];
+
                 modalWeapons = {"rock":{"beats":["scissors"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","well"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper"],"ties":[],"shortcut":"s","button":{}},"well":{"beats":["rock","scissors"],"ties":[],"shortcut":"w","button":{}}};
                 break;
             case "2":
-                modalSettings = {"autoplayInterval":2000,"shortcuts":["?","a","r","p","s","k","l"],"askBeforeRemove":true,"showWarnings":false};
+                modalSettings.shortcuts = ["?","a","r","p","s","k","l"];
+
                 modalWeapons = {"rock":{"beats":["scissors","lizard"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","spock"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","lizard"],"ties":[],"shortcut":"s","button":{}},"spock":{"beats":["rock","scissors"],"ties":[],"shortcut":"k","button":{}},"lizard":{"beats":["paper","spock"],"ties":[],"shortcut":"l","button":{}}};
                 break;
             case "3":
-                modalSettings = {"autoplayInterval":2000,"shortcuts":["?","a","r","p","s","f","w"],"askBeforeRemove":true,"showWarnings":false};
+                modalSettings.shortcuts = ["?","a","r","p","s","f","w"];
+
                 modalWeapons = {"rock":{"beats":["scissors","water"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","water"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","water"],"ties":[],"shortcut":"s","button":{}},"fire":{"beats":["rock","paper","scissors"],"ties":[],"shortcut":"f","button":{}},"water":{"beats":["fire"],"ties":[],"shortcut":"w","button":{}}};
                 break;
             default:
@@ -492,16 +497,16 @@ function submitNewSettings() {
     for (let index = 0; index < modalListOfEntries.length; index++) {
         const currentModalEntry = modalListOfEntries[index];
 
-        let currentWeaponName = currentModalEntry.querySelector(`input.js-name-input`).value;
-        let currentWeaponShortcut = currentModalEntry.querySelector(`input.js-shortcut-input`).value.toLowerCase();
+        const currentWeaponName = currentModalEntry.querySelector(`input.js-name-input`).value;
+        const currentWeaponShortcut = currentModalEntry.querySelector(`input.js-shortcut-input`).value.toLowerCase();
 
         modalWeapons[currentWeaponName] = {};
 
-        let currentWeaponsDropdowns = currentModalEntry.querySelectorAll("select");
+        const currentWeaponsDropdowns = currentModalEntry.querySelectorAll("select");
 
         if (modalListOfEntries.length > 1) {
-            let currentWeaponBeats = Array.from(currentWeaponsDropdowns[0].selectedOptions).map(({ value }) => value);
-            let currentWeaponTies = Array.from(currentWeaponsDropdowns[1].selectedOptions).map(({ value }) => value);
+            const currentWeaponBeats = Array.from(currentWeaponsDropdowns[0].selectedOptions).map(({ value }) => value);
+            const currentWeaponTies = Array.from(currentWeaponsDropdowns[1].selectedOptions).map(({ value }) => value);
 
             modalWeapons[currentWeaponName]["beats"] = currentWeaponBeats;
             modalWeapons[currentWeaponName]["ties"] = currentWeaponTies;
@@ -533,6 +538,8 @@ function submitNewSettings() {
     if (!errorMessage) {
         const settingsAreDifferent = !objectValuesAreTheSame(weapons, modalWeapons) || !objectValuesAreTheSame(settings, modalSettings) || !objectValuesAreTheSame(score, modalScore);
 
+        const autoplayIntervalWasChanged = settings.autoplayInterval !== modalSettings.autoplayInterval;
+
         weapons = JSON.parse(JSON.stringify(modalWeapons));
         settings = JSON.parse(JSON.stringify(modalSettings));
         score = JSON.parse(JSON.stringify(modalScore));
@@ -552,6 +559,12 @@ function submitNewSettings() {
         }
         else {
             showNotification ("info", "No Edits Have Been Made");
+        }
+
+        //if the interval was changed while autoplaying, update the interval and restart autoplaying
+        if (autoplaying && autoplayIntervalWasChanged) {
+            autoplayGame();
+            autoplayGame();
         }
     }
     else {

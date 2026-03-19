@@ -16,7 +16,7 @@ const defaultWeapons = {
     },
 };
 
-let defaultSettings = {
+const defaultSettings = {
     autoplayInterval: 2000,
     shortcuts: ["?", "a"],
     askBeforeRemove: true,
@@ -72,8 +72,7 @@ function initializeDefaultGameState() {
 
     document.querySelector(".js-close-btn").addEventListener("click", () => closeSettingsModal());
     document.querySelector("#modal-container").addEventListener("click", (e) => {
-        if (e.target === (document.querySelector("#modal-container")))
-            closeSettingsModal();
+        if (e.target === (document.querySelector("#modal-container"))) closeSettingsModal();
     });
 
     document.querySelector(".js-add-btn").addEventListener("click", () => {addWeaponToSettings();});
@@ -153,7 +152,7 @@ function initializeDefaultGameState() {
 }
 
 function generateDefaultWeaponsHTML() {
-    let arsenal = document.querySelector(".js-button-holder");
+    const arsenal = document.querySelector(".js-button-holder");
 
     let arsenalHTML = `<button class="js-random-btn random-btn move-btn">random</button>`;
 
@@ -166,7 +165,7 @@ function generateDefaultWeaponsHTML() {
 
 function setupWeaponButtonListeners() {
     //set up event listeners for the random button
-    let randomButton = document.querySelector(".js-random-btn");
+    const randomButton = document.querySelector(".js-random-btn");
     randomButton.addEventListener("click", () => {if(!autoplaying) playOneRound(chooseRandomWeapon())});
     randomButton.addEventListener("mouseover", () => {if(!autoplaying)
         setButtonBackground(randomButton, "random");
@@ -183,13 +182,11 @@ function setupWeaponButtonListeners() {
         currentWeaponButton.addEventListener("click", () => {if(!autoplaying) playOneRound(weapon)});
 
         currentWeaponButton.addEventListener("mouseover", () => {
-            if(!autoplaying) {
-                setButtonBackground(currentWeaponButton, weapon);
-            }
+            if(!autoplaying) setButtonBackground(currentWeaponButton, weapon);
         });
 
         currentWeaponButton.addEventListener("mouseout", () => {
-            setButtonBackground(currentWeaponButton, weapon, true);
+            if(!autoplaying) setButtonBackground(currentWeaponButton, weapon, true);
         });
 
         //add the weapon shortcut to the settings object
@@ -309,18 +306,8 @@ function chooseRandomWeapon() {
 
 function autoplayGame() {
     if (!autoplaying) {
-        intervalId = setInterval(() => {
-            Object.keys(weapons).forEach(weapon => {
-                setButtonBackground(weapons[weapon]["button"], weapon, true);
-            });
-
-            const bothWeapons = playOneRound(chooseRandomWeapon());
-
-            //show the weapon background when it is picked during autoplay 
-            bothWeapons.forEach(weapon => {
-                setButtonBackground(weapons[weapon]["button"], weapon);
-            });
-        }, settings.autoplayInterval);
+        playOneRandomRound();
+        intervalId = setInterval(playOneRandomRound, settings.autoplayInterval);
 
         document.querySelector(".js-autoplay-btn").classList.add("rotating-border");
         autoplaying = true;
@@ -334,6 +321,19 @@ function autoplayGame() {
         document.querySelector(".js-autoplay-btn").classList.remove("rotating-border");
         autoplaying = false;
     }
+}
+
+function playOneRandomRound() {
+    Object.keys(weapons).forEach(weapon => {
+        setButtonBackground(weapons[weapon]["button"], weapon, true);
+    });
+
+    const bothWeapons = playOneRound(chooseRandomWeapon());
+
+    //show the weapon background when it is picked during autoplay 
+    bothWeapons.forEach(weapon => {
+        setButtonBackground(weapons[weapon]["button"], weapon);
+    });
 }
 
 function playOneRound(selectedPlayerWeapon) {
