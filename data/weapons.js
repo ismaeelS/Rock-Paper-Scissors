@@ -1,2 +1,2 @@
-let weapons = {
+const weapons = {
 }

@@ -30,8 +30,8 @@ let score = JSON.parse(localStorage.getItem("score")) || {
     ties: 0,
 };
 
-settings = JSON.parse(localStorage.getItem("settings")) || defaultSettings;
-weapons = JSON.parse(localStorage.getItem("weapons")) || defaultWeapons;
+assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
+assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
 
 let modalWeapons = {};
 let modalSettings = {};
@@ -105,10 +105,11 @@ function initializeDefaultGameState() {
         const ableToResetSettings = restoreDefaultSettings();
 
         if (!ableToResetScore && !ableToResetSettings) {
-            showNotification("info", "Setting Are Already Default and the Score is already 0-0-0")
+            showNotification("info", "Setting Are Already Default and the Score is already 0-0-0");
         }
         else {
-            showNotification("success", "Default Settings Have Been Restored and the Score is Reset")
+            showNotification("success", "Default Settings and the Score Have Been Reset");
+            closeSettingsModal();
         }
     });
     document.querySelector(".js-reset-all-btn").addEventListener("mouseenter", (e) => {        
@@ -399,6 +400,8 @@ function resetScore() {
 
         return true;
     }
+
+    localStorage.removeItem("score");
     
     return false;
 }
@@ -523,5 +526,26 @@ function setUpRemoveButtonListener(removeButton) {
 
             updateSettingsModal();
         }
+    });
+}
+
+function assignValuesToObject(target, source, defaultObject) {
+    if (!source) {
+        source = defaultObject;
+    }
+
+    const targetKeys = Object.keys(target);
+    const sourceKeys = Object.keys(source);
+
+    // remove any added buttons
+    targetKeys.forEach((targetKey) => {
+        if (!sourceKeys.includes(targetKey)) {
+            delete target[targetKey];
+        }
+    });
+
+
+    sourceKeys.forEach((objectKey) => {
+        target[objectKey] = source[objectKey];
     });
 }

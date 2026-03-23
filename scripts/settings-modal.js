@@ -118,8 +118,8 @@ function undoSettingsChanges() {
 
 function restoreDefaultSettings() {
     if (!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings)) {
-        weapons = JSON.parse(JSON.stringify(defaultWeapons));
-        settings = JSON.parse(JSON.stringify(defaultSettings));
+        assignValuesToObject(weapons, defaultWeapons);
+        assignValuesToObject(settings, defaultSettings);
 
         localStorage.removeItem("weapons");
         localStorage.removeItem("settings");
@@ -540,8 +540,9 @@ function submitNewSettings() {
 
         const autoplayIntervalWasChanged = settings.autoplayInterval !== modalSettings.autoplayInterval;
 
-        weapons = JSON.parse(JSON.stringify(modalWeapons));
-        settings = JSON.parse(JSON.stringify(modalSettings));
+        assignValuesToObject(weapons, modalWeapons);
+        assignValuesToObject(settings, modalSettings);
+        
         score = JSON.parse(JSON.stringify(modalScore));
 
         generateDefaultWeaponsHTML();

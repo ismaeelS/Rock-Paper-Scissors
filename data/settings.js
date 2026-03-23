@@ -1,2 +1,2 @@
-let settings = {
+const settings = {
 }
