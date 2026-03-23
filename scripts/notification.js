@@ -1,5 +1,5 @@
 //this is to restrict the notifications spamming the screen
-let activeNotifications = [];
+const activeNotifications = [];
 
 // https://www.youtube.com/watch?v=wZu4q0FyTOk
 function showNotification(messageType, message, buttonElement=null, secondsVisible=2) {
@@ -37,7 +37,13 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
 
     setTimeout(() => {
         //remove all instances of this message
-        activeNotifications = activeNotifications.filter((messageID) => messageID !== thisMessageID);
+        const filteredNotifications = activeNotifications.filter((messageID) => messageID !== thisMessageID);
+
+        activeNotifications.length = 0;
+        
+        filteredNotifications.forEach((activeNotification) => {
+            activeNotifications.push(activeNotification);
+        });
         //remove the notification from view
         notification.remove();
     }, secondsVisible*1000);
