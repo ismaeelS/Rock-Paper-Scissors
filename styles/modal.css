@@ -116,10 +116,6 @@
     animation: zoomOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
-#modal-container.fold-animation.out .modal-background .modal-content {
-    animation: zoomOut 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-}
-
 .close-btn {
     position: absolute;
     top: 1rem;

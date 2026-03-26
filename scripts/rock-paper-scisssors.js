@@ -506,9 +506,11 @@ function setUpRemoveButtonListener(removeButton) {
         if (!modalSettings.askBeforeRemove || confirm(`Are you sure you want to remove the ${currentWeaponName} button?`)) {
             const buttonEntry = document.querySelector(`.js-${currentWeaponName}-button-entry`);
 
+            //remove the corresponding shortcut
             modalSettings["shortcuts"] = modalSettings["shortcuts"].filter(shortcut => 
                 shortcut !== modalWeapons[currentWeaponName]["shortcut"]);
 
+            //remove the button object and all associations to it from other buttons
             Object.keys(modalWeapons).forEach((weaponKey) => {
                 if (weaponKey === currentWeaponName) {
                     delete modalWeapons[weaponKey];
@@ -537,13 +539,13 @@ function assignValuesToObject(target, source, defaultObject) {
     const targetKeys = Object.keys(target);
     const sourceKeys = Object.keys(source);
 
-    // remove any added buttons
+    // remove any buttons the target has that the source does not
+    // (this part is not applicable to settings since the keys do not change)
     targetKeys.forEach((targetKey) => {
         if (!sourceKeys.includes(targetKey)) {
             delete target[targetKey];
         }
     });
-
 
     sourceKeys.forEach((objectKey) => {
         target[objectKey] = source[objectKey];
