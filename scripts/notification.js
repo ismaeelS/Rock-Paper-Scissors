@@ -1,50 +1,48 @@
 //this is to restrict the notifications spamming the screen
-const activeNotifications = [];
+const activeNotifications = {};
 
 // https://www.youtube.com/watch?v=wZu4q0FyTOk
-function showNotification(messageType, message, buttonElement=null, secondsVisible=2) {
-    const notificationContainer = document.querySelector(".notification-container");
-    
+function showNotification(messageType, message, buttonElement=null, secondsVisible=3) {
     // if warnings are turned off, do not show the notification
     if (messageType === "warning" && !modalSettings.showWarnings) {
         return;
     }
 
-    const thisMessageID = (messageType+message+buttonElement+secondsVisible).replace(/\s+/g, '');
-
-    if (activeNotifications.includes(thisMessageID)) {
-        return;
-    }
-    else {
-        activeNotifications.push(thisMessageID);
-    }
-
-    //disable the button temporarily warning may prevent action
+    //disable the button temporarily to prevent action before seeing the notification
+    //ideally would have a confirmation after the click
     if (buttonElement) {
         buttonElement.disabled = true;
         
         setTimeout(() => {
             buttonElement.disabled = false;
-        }, 300);
+        }, 250);
     }
 
+    const messageSuffix = (messageType.toUpperCase()+message+secondsVisible).replace(/\W/ig, "");
+    const thisMessageID = (buttonElement) ? (buttonElement.textContent.toUpperCase() + messageSuffix) : messageSuffix;
+
+    //create the notification and display it
+    const notificationContainer = document.querySelector(".notification-container");
     const notification = document.createElement("div");
-
     notification.classList.add("notification", messageType);
-
     notification.textContent = message;
     notificationContainer.appendChild(notification);
 
-    setTimeout(() => {
-        //remove all instances of this message
-        const filteredNotifications = activeNotifications.filter((messageID) => messageID !== thisMessageID);
+    //if an instance of this message is already visible, prematurely time it out and remove it
+    if (Object.keys(activeNotifications).includes(thisMessageID)) {
+        activeNotifications[thisMessageID]["button"].remove();
+        clearTimeout(activeNotifications[thisMessageID]["timer"]);
+        delete activeNotifications[thisMessageID];
+    }
 
-        activeNotifications.length = 0;
-        
-        filteredNotifications.forEach((activeNotification) => {
-            activeNotifications.push(activeNotification);
-        });
-        //remove the notification from view
+    //timer to remove notification and corresponding entry
+    const timeoutId = setTimeout(() => {
         notification.remove();
+        delete activeNotifications[thisMessageID];
     }, secondsVisible*1000);
+    
+    //save notification info entry so can be prematurely canceled 
+    activeNotifications[thisMessageID] = {};
+    activeNotifications[thisMessageID]["timer"] = timeoutId;
+    activeNotifications[thisMessageID]["button"] = notification;
 }

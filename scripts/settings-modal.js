@@ -3,11 +3,15 @@ const modalContainerEle = document.querySelector("#modal-container");
 document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
     modalSettings.askBeforeRemove = e.target.checked;
     settings.askBeforeRemove = e.target.checked;
+    localStorage.setItem("settings", JSON.stringify(settings));
+
     showNotification("success", "Setting Saved");
 });
 document.querySelector("#show-warnings").addEventListener("change", (e) => {
     modalSettings.showWarnings = e.target.checked;
     settings.showWarnings = e.target.checked;
+    localStorage.setItem("settings", JSON.stringify(settings));
+
     showNotification("success", "Setting Saved");
 });
 
@@ -32,7 +36,7 @@ function openSettingsModal() {
 function closeSettingsModal() {
     modalContainerEle.classList.add("out");
     
-    if (!objectValuesAreTheSame(modalSettings, settings) || !objectValuesAreTheSame(modalWeapons, weapons)) {
+    if (!checkIfObjectValuesAreTheSame(modalSettings, settings) || !checkIfObjectValuesAreTheSame(modalWeapons, weapons)) {
         showNotification("info", "Button Edits Not Saved. Please Click Submit to Save Changes");
     }
     
@@ -77,8 +81,8 @@ function addWeaponToSettings() {
 }
 
 function formatWeaponName(attemptedWeaponName) {
-    //remove non alphanumeric values, remove leading numbers and periods, lowercase and truncate
-    attemptedWeaponName = attemptedWeaponName.replace(/[^0-9a-z]/gi, '').toLowerCase().substring(0,10);
+    //remove non alphanumeric characters, lowercase, and truncate
+    attemptedWeaponName = attemptedWeaponName.replace(/[^0-9a-z]/ig, "").toLowerCase().substring(0,10);
 
     //if too many w or m
     const numberofMs = (attemptedWeaponName.match(new RegExp("m", "g")) || []).length;
@@ -104,7 +108,7 @@ function undoSettingsChanges() {
         document.querySelector("#autoplay-interval").value = (modalSettings.autoplayInterval)/1000;
     }, 0);
 
-    if (!objectValuesAreTheSame(modalWeapons, weapons) || !objectValuesAreTheSame(modalSettings, settings)) {
+    if (!checkIfObjectValuesAreTheSame(modalWeapons, weapons) || !checkIfObjectValuesAreTheSame(modalSettings, settings)) {
         modalWeapons = JSON.parse(JSON.stringify(weapons));
         modalSettings = JSON.parse(JSON.stringify(settings))
 
@@ -117,7 +121,7 @@ function undoSettingsChanges() {
 }
 
 function restoreDefaultSettings() {
-    if (!objectValuesAreTheSame(modalWeapons, defaultWeapons) || !objectValuesAreTheSame(modalSettings, defaultSettings)) {
+    if (!checkIfObjectValuesAreTheSame(modalWeapons, defaultWeapons) || !checkIfObjectValuesAreTheSame(modalSettings, defaultSettings)) {
         assignValuesToObject(weapons, defaultWeapons);
         assignValuesToObject(settings, defaultSettings);
 
@@ -134,7 +138,7 @@ function restoreDefaultSettings() {
 }
 
 // credits to https://www.youtube.com/watch?v=8s3u656gpkk
-function objectValuesAreTheSame(objA, objB) {
+function checkIfObjectValuesAreTheSame(objA, objB) {
     //recursion base cases
     if (objA === objB) return true;
 
@@ -172,7 +176,7 @@ function objectValuesAreTheSame(objA, objB) {
         if (key === "button") {
             continue;
         }
-        if (!objectValuesAreTheSame(objA[key], objB[key])) return false;
+        if (!checkIfObjectValuesAreTheSame(objA[key], objB[key])) return false;
     }
 
     return true;
@@ -195,9 +199,9 @@ async function checkAndUseFile(event) {
 
     const fileError = validateInputFile(fileData);
 
-    const fileDataDiffersFromCurrentData = !objectValuesAreTheSame(score, fileData["score"]) || 
-    !objectValuesAreTheSame(modalSettings, fileData["settings"]) || 
-    !objectValuesAreTheSame(modalWeapons, fileData["weapons"]);
+    const fileDataDiffersFromCurrentData = !checkIfObjectValuesAreTheSame(score, fileData["score"]) || 
+    !checkIfObjectValuesAreTheSame(modalSettings, fileData["settings"]) || 
+    !checkIfObjectValuesAreTheSame(modalWeapons, fileData["weapons"]);
     
     if (!fileError && fileDataDiffersFromCurrentData) {
         modalScore = JSON.parse(JSON.stringify(fileData["score"]));
@@ -536,13 +540,13 @@ function submitNewSettings() {
     errorMessage = weaponsHaveConflicts(modalWeapons);
 
     if (!errorMessage) {
-        const settingsAreDifferent = !objectValuesAreTheSame(weapons, modalWeapons) || !objectValuesAreTheSame(settings, modalSettings) || !objectValuesAreTheSame(score, modalScore);
+        const settingsAreDifferent = !checkIfObjectValuesAreTheSame(weapons, modalWeapons) || !checkIfObjectValuesAreTheSame(settings, modalSettings) || !checkIfObjectValuesAreTheSame(score, modalScore);
 
         const autoplayIntervalWasChanged = settings.autoplayInterval !== modalSettings.autoplayInterval;
 
         assignValuesToObject(weapons, modalWeapons);
         assignValuesToObject(settings, modalSettings);
-        
+
         score = JSON.parse(JSON.stringify(modalScore));
 
         generateDefaultWeaponsHTML();
