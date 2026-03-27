@@ -1,2 +1,2 @@
-const settings = {
+export const settings = {
 }

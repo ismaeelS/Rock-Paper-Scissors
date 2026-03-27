@@ -1,2 +1,2 @@
-const weapons = {
+export const weapons = {
 }
