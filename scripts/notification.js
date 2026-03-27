@@ -8,6 +8,14 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
         return;
     }
 
+    //if the user is spamming notifications, warn them
+    if (Object.keys(activeNotifications).length > 3) {
+        messageType = "warning";
+        message = "Okay, relax buddy";
+        buttonElement = null;
+        secondsVisible = 3;
+    }
+
     //disable the button temporarily to prevent action before seeing the notification
     //ideally would have a confirmation after the click
     if (buttonElement) {
@@ -18,8 +26,8 @@ function showNotification(messageType, message, buttonElement=null, secondsVisib
         }, 250);
     }
 
-    const messageSuffix = (messageType.toUpperCase()+message+secondsVisible).replace(/\W/ig, "");
-    const thisMessageID = (buttonElement) ? (buttonElement.textContent.toUpperCase() + messageSuffix) : messageSuffix;
+    const messageSuffix = (messageType.toUpperCase()+message+secondsVisible).replace(/[^a-zA-Z0-9]/g, '');
+    const thisMessageID = (buttonElement) ? (buttonElement.textContent.replace(/[^a-zA-Z0-9]/g, '') + messageSuffix) : messageSuffix;
 
     //create the notification and display it
     const notificationContainer = document.querySelector(".notification-container");

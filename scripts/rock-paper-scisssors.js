@@ -33,8 +33,8 @@ let score = JSON.parse(localStorage.getItem("score")) || {
 assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
 assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
 
-let modalWeapons = {};
-let modalSettings = {};
+const modalWeapons = {};
+const modalSettings = {};
 let modalScore = {};
 
 let autoplaying = false;
@@ -233,14 +233,14 @@ function setupWeaponButtonListeners() {
         }
     });
 
-    modalWeapons = JSON.parse(JSON.stringify(weapons));
+    assignValuesToObject(modalWeapons, weapons);
 
     Object.keys(weapons).forEach(weapon => {
         modalWeapons[weapon]["button"] = weapons[weapon]["button"];
     });
 
-    //reassign default to include rock, paper, scissors for comparing checks in restore and undo. then reassign autoplay interval
-    modalSettings = JSON.parse(JSON.stringify(settings));
+    //assign modal settings to include the current settings
+    assignValuesToObject(modalSettings, settings);
 }
 
 function setButtonBackground(buttonElement, weaponName, clearBackground=false) {

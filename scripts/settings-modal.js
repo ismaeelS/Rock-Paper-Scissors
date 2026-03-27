@@ -2,17 +2,13 @@ const modalContainerEle = document.querySelector("#modal-container");
 
 document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
     modalSettings.askBeforeRemove = e.target.checked;
-    settings.askBeforeRemove = e.target.checked;
-    localStorage.setItem("settings", JSON.stringify(settings));
 
-    showNotification("success", "Setting Saved");
+    showNotification("info", "Setting In Effect, But Not Saved");
 });
 document.querySelector("#show-warnings").addEventListener("change", (e) => {
     modalSettings.showWarnings = e.target.checked;
-    settings.showWarnings = e.target.checked;
-    localStorage.setItem("settings", JSON.stringify(settings));
 
-    showNotification("success", "Setting Saved");
+    showNotification("info", "Setting In Effect, But Not Saved");
 });
 
 function openSettingsModal() {
@@ -73,7 +69,12 @@ function addWeaponToSettings() {
         modalWeapons[newWeaponName]["beats"] = [];
         modalWeapons[newWeaponName]["ties"] = [];
 
+        //modal is updated based on modal settings values but the autoplay interval value, if changed, is not yet saved
+        const unsavedAutoplayIntervalSettings = document.querySelector("#autoplay-interval").value;
+        
         updateSettingsModal();
+
+        document.querySelector("#autoplay-interval").value = unsavedAutoplayIntervalSettings;
     }
     else {
         showNotification("error", "Maximum Number of Buttons Reached");
@@ -109,11 +110,9 @@ function undoSettingsChanges() {
     }, 0);
 
     if (!checkIfObjectValuesAreTheSame(modalWeapons, weapons) || !checkIfObjectValuesAreTheSame(modalSettings, settings)) {
-        modalWeapons = JSON.parse(JSON.stringify(weapons));
-        modalSettings = JSON.parse(JSON.stringify(settings))
+        assignValuesToObject(modalWeapons, weapons);
+        assignValuesToObject(modalSettings, settings);
 
-        generateDefaultWeaponsHTML();
-        setupWeaponButtonListeners();
         updateSettingsModal();
 
         showNotification("success", "Recent Edits Have Been Reversed");
@@ -205,8 +204,8 @@ async function checkAndUseFile(event) {
     
     if (!fileError && fileDataDiffersFromCurrentData) {
         modalScore = JSON.parse(JSON.stringify(fileData["score"]));
-        modalSettings = JSON.parse(JSON.stringify(fileData["settings"]));
-        modalWeapons = JSON.parse(JSON.stringify(fileData["weapons"]));
+        assignValuesToObject(modalSettings, fileData["settings"]);
+        assignValuesToObject(modalWeapons, fileData["weapons"]);
 
         updateSettingsModal();
 
@@ -461,17 +460,20 @@ function loadPresets() {
             case "1":
                 modalSettings.shortcuts = ["?","a","r","p","s","w"];
 
-                modalWeapons = {"rock":{"beats":["scissors"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","well"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper"],"ties":[],"shortcut":"s","button":{}},"well":{"beats":["rock","scissors"],"ties":[],"shortcut":"w","button":{}}};
+                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","well"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper"],"ties":[],"shortcut":"s","button":{}},"well":{"beats":["rock","scissors"],"ties":[],"shortcut":"w","button":{}}});
+
                 break;
             case "2":
                 modalSettings.shortcuts = ["?","a","r","p","s","k","l"];
 
-                modalWeapons = {"rock":{"beats":["scissors","lizard"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","spock"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","lizard"],"ties":[],"shortcut":"s","button":{}},"spock":{"beats":["rock","scissors"],"ties":[],"shortcut":"k","button":{}},"lizard":{"beats":["paper","spock"],"ties":[],"shortcut":"l","button":{}}};
+                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors","lizard"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","spock"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","lizard"],"ties":[],"shortcut":"s","button":{}},"spock":{"beats":["rock","scissors"],"ties":[],"shortcut":"k","button":{}},"lizard":{"beats":["paper","spock"],"ties":[],"shortcut":"l","button":{}}});
+
                 break;
             case "3":
                 modalSettings.shortcuts = ["?","a","r","p","s","f","w"];
 
-                modalWeapons = {"rock":{"beats":["scissors","water"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","water"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","water"],"ties":[],"shortcut":"s","button":{}},"fire":{"beats":["rock","paper","scissors"],"ties":[],"shortcut":"f","button":{}},"water":{"beats":["fire"],"ties":[],"shortcut":"w","button":{}}};
+                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors","water"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","water"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","water"],"ties":[],"shortcut":"s","button":{}},"fire":{"beats":["rock","paper","scissors"],"ties":[],"shortcut":"f","button":{}},"water":{"beats":["fire"],"ties":[],"shortcut":"w","button":{}}});
+
                 break;
             default:
                 break;
@@ -483,13 +485,15 @@ function loadPresets() {
 
 //ideally would check if there are any form changes. if not then, would not execute
 function submitNewSettings() {
-    modalWeapons = {};
-    modalSettings = {
+    //clear all values from modal weapons
+    assignValuesToObject(modalWeapons, {});
+
+    assignValuesToObject(modalSettings, {
         autoplayInterval: Number(document.querySelector("#autoplay-interval").value)*1000,
         shortcuts: ["?", "a"],
         askBeforeRemove: document.querySelector("#ask-before-remove").checked,
         showWarnings: document.querySelector("#show-warnings").checked,
-    };
+    });
 
     // if user manually enter unsupported number, limit it. ideally would allow restricted typing
     if (modalSettings["autoplayInterval"] < 0) modalSettings["autoplayInterval"] = 0;
@@ -573,6 +577,6 @@ function submitNewSettings() {
         }
     }
     else {
-        showNotification("error", errorMessage, 5);
+        showNotification("error", errorMessage, null, 5);
     }
 }
