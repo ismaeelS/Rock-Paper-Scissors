@@ -23,19 +23,20 @@ const defaultSettings = {
     showWarnings: false,
 };
 
-// import score from local storage if available or initialize a score starting at 0-0-0
-let score = JSON.parse(localStorage.getItem("score")) || {
+const score = {};
+
+// import values from local storage if available or initialize with defaults
+assignValuesToObject(score, JSON.parse(localStorage.getItem("score")), {
     wins: 0,
     losses: 0,
     ties: 0,
-};
-
+});
 assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
 assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
 
 const modalWeapons = {};
 const modalSettings = {};
-let modalScore = {};
+const modalScore = {}; //relevant when uploading files that contain score data
 
 let autoplaying = false;
 let intervalId;
@@ -283,12 +284,15 @@ function updateScoreboard() {
         winRateParagraph.classList.add(`turn-text-${winRate > (1/3) ? "green": "red"}`);
     }
 
-    //hide the reset button if there are no rounds to reset
-    document.querySelector(".js-reset-score-btn").style.visibility = (roundsPlayed) ? "visible": "hidden";
+    //hide the game summary and reset button if there are no rounds to reset
+    document.querySelector(".js-game-summary-and-reset-score").style.visibility = (roundsPlayed) ? "visible": "hidden";
+
+    //reset the colors if the score has been reset
+    if (!roundsPlayed) resetColors();
     
     updateButtonHolder();
 
-    modalScore = JSON.parse(JSON.stringify(score));
+    assignValuesToObject(modalScore, score);
 }
 
 /**

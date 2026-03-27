@@ -52,10 +52,8 @@ function closeSettingsModal() {
 function addWeaponToSettings() {
     //limit buttons to the number of letters (case if every button has a shortcut + a for autoplay)
     if (Object.keys(modalWeapons).length < 25) {
-        let newWeaponName = prompt("Enter the new button's name (up to 10 characters)");
+        const newWeaponName = formatWeaponName(prompt("Enter the new button's name (up to 10 characters)"));
         if (!newWeaponName) return;
-
-        newWeaponName = formatWeaponName(newWeaponName);
 
         if (Object.keys(modalWeapons).includes(newWeaponName)) {
             showNotification("error", "This Button Already Exists");
@@ -82,6 +80,8 @@ function addWeaponToSettings() {
 }
 
 function formatWeaponName(attemptedWeaponName) {
+    if (!attemptedWeaponName) return null;
+
     //remove non alphanumeric characters, lowercase, and truncate
     attemptedWeaponName = attemptedWeaponName.replace(/[^0-9a-z]/ig, "").toLowerCase().substring(0,10);
 
@@ -124,8 +124,8 @@ function restoreDefaultSettings() {
         assignValuesToObject(weapons, defaultWeapons);
         assignValuesToObject(settings, defaultSettings);
 
-        localStorage.removeItem("weapons");
         localStorage.removeItem("settings");
+        localStorage.removeItem("weapons");
 
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
@@ -203,7 +203,7 @@ async function checkAndUseFile(event) {
     !checkIfObjectValuesAreTheSame(modalWeapons, fileData["weapons"]);
     
     if (!fileError && fileDataDiffersFromCurrentData) {
-        modalScore = JSON.parse(JSON.stringify(fileData["score"]));
+        assignValuesToObject(modalScore, fileData["score"]);
         assignValuesToObject(modalSettings, fileData["settings"]);
         assignValuesToObject(modalWeapons, fileData["weapons"]);
 
@@ -550,8 +550,7 @@ function submitNewSettings() {
 
         assignValuesToObject(weapons, modalWeapons);
         assignValuesToObject(settings, modalSettings);
-
-        score = JSON.parse(JSON.stringify(modalScore));
+        assignValuesToObject(score, modalScore);
 
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
@@ -559,9 +558,9 @@ function submitNewSettings() {
         
         closeSettingsModal();
 
+        localStorage.setItem("score", JSON.stringify(score));
         localStorage.setItem("settings", JSON.stringify(settings));
         localStorage.setItem("weapons", JSON.stringify(weapons));
-        localStorage.setItem("score", JSON.stringify(score));
 
         if (settingsAreDifferent) {
             showNotification("success", "Settings Succesfully Updated");
