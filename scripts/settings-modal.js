@@ -638,7 +638,7 @@ export function submitNewSettings(autoplaying, autoplayGame) {
         }
     }
 
-    errorMessage = weaponsHaveConflicts(modalWeapons);
+    const errorMessage = weaponsHaveConflicts(modalWeapons);
 
     if (!errorMessage) {
         const settingsAreDifferent = !checkIfObjectValuesAreTheSame(weapons, modalWeapons) || !checkIfObjectValuesAreTheSame(settings, modalSettings) || !checkIfObjectValuesAreTheSame(score, modalScore);
