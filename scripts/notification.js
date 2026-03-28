@@ -1,6 +1,6 @@
 let modalSettings;
 
-export function initNotifications(modalSettingsRef) {
+export function linkToNotification(modalSettingsRef) {
     modalSettings = modalSettingsRef;
 }
 

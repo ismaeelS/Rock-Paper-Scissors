@@ -3,8 +3,8 @@ import { weapons } from "../data/weapons.js";
 import { imageNames } from "../data/imageNames.js";
 
 import { assignValuesToObject } from "./utils/object-helpers.js";
-import { showNotification, initNotifications } from "./notification.js";
-import { initModal, isSettingsModalOpen, openSettingsModal, closeSettingsModal, updateSettingsModal, addWeaponToSettings, undoSettingsChanges, restoreDefaultSettings, uploadFile, saveFile, loadPresets, submitNewSettings } from "./settings-modal.js";
+import { linkToNotification, showNotification } from "./notification.js";
+import { linkToModal, isSettingsModalOpen, openSettingsModal, closeSettingsModal, updateSettingsModal, addWeaponToSettings, undoSettingsChanges, restoreDefaultSettings, uploadFile, saveFile, loadPresets, submitNewSettings } from "./settings-modal.js";
 
 const defaultWeapons = {
     rock: {
@@ -53,8 +53,8 @@ const pageTitle = document.querySelector(".js-page-title");
 const resultsParagraph = document.querySelector(".js-results-text");
 const winRateParagraph = document.querySelector(".js-win-rate");
 
-initNotifications(modalSettings);
-initModal({
+linkToNotification(modalSettings);
+linkToModal({
     modalWeapons,
     modalSettings,
     modalScore,
