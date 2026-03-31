@@ -151,10 +151,10 @@ function initializeDefaultGameState() {
     document.querySelector(".js-autoplay-btn").addEventListener("click", () => {autoplayGame();});
     document.querySelector(".js-autoplay-btn").addEventListener("mouseenter", (e) => {
         if(!autoplaying) {
-            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves", e.target);
+            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves");
         }
         else {
-            showNotification("info", "Click Autoplay Again to End Autoplay", e.target);
+            showNotification("info", "Click Autoplay Again to End Autoplay");
         }
     });
     document.querySelector(".js-reset-score-btn").addEventListener("click", () => {
@@ -168,6 +168,8 @@ function initializeDefaultGameState() {
     document.querySelector(".js-reset-score-btn").addEventListener("mouseenter", (e) => {
         showNotification("warning", "All Score Data Will Be Reset. Buttons Will Not Be Affected", e.target, 5);
     });
+
+    document.querySelector(".js-autoplay-btn").style.visibility = "visible";
 
     setupWeaponButtonListeners();
 
