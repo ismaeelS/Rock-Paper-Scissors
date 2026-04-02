@@ -170,7 +170,6 @@ export function openSettingsModal() {
     settingsModalIsOpen = true;
 }
 
-//ideally would have a check if there are unsaved values before allowing the modal to close
 export function closeSettingsModal() {
     modalContainerEle.classList.add("out");
 
