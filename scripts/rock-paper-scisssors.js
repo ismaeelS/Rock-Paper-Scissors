@@ -1,6 +1,6 @@
-import { settings } from "../data/settings.js";
-import { weapons } from "../data/weapons.js";
-import { imageNames } from "../data/imageNames.js";
+import { settings } from "./data/settings.js";
+import { weapons } from "./data/weapons.js";
+import { imageNames } from "./data/imageNames.js";
 
 import { assignValuesToObject } from "./utils/object-helpers.js";
 import { linkToNotification, showNotification } from "./notification.js";
