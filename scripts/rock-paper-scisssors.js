@@ -1,46 +1,12 @@
-import { settings } from "./data/settings.js";
-import { weapons } from "./data/weapons.js";
+import { settings, defaultSettings } from "./data/settings.js";
+import { weapons, defaultWeapons } from "./data/weapons.js";
 import { imageNames } from "./data/imageNames.js";
 
 import { assignValuesToObject } from "./utils/object-helpers.js";
 import { linkToNotification, showNotification } from "./notification.js";
 import { linkToModal, isSettingsModalOpen, openSettingsModal, closeSettingsModal, updateSettingsModal, addWeaponToSettings, undoSettingsChanges, restoreDefaultSettings, uploadFile, saveFile, loadPresets, submitNewSettings } from "./settings-modal.js";
 
-const defaultWeapons = {
-    rock: {
-        beats: ["scissors"],
-        ties: [],
-        shortcut: "r",
-    },
-    paper: {
-        beats: ["rock"],
-        ties: [],
-        shortcut: "p",
-    },
-    scissors: {
-        beats: ["paper"],
-        ties: [],
-        shortcut: "s",
-    },
-};
-
-const defaultSettings = {
-    autoplayInterval: 2000,
-    shortcuts: ["?", "a"],
-    askBeforeRemove: true,
-    showWarnings: false,
-};
-
 const score = {};
-
-// import values from local storage if available or initialize with defaults
-assignValuesToObject(score, JSON.parse(localStorage.getItem("score")), {
-    wins: 0,
-    losses: 0,
-    ties: 0,
-});
-assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
-assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
 
 const modalWeapons = {};
 const modalSettings = {};
@@ -53,7 +19,15 @@ const pageTitle = document.querySelector(".js-page-title");
 const resultsParagraph = document.querySelector(".js-results-text");
 const winRateParagraph = document.querySelector(".js-win-rate");
 
-linkToNotification(modalSettings);
+// import values from local storage if available or initialize with defaults
+assignValuesToObject(score, JSON.parse(localStorage.getItem("score")), {
+    wins: 0,
+    losses: 0,
+    ties: 0,
+});
+assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
+assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
+
 linkToModal({
     modalWeapons,
     modalSettings,
@@ -68,6 +42,7 @@ linkToModal({
     updateButtonHolder,
     updateScoreboard,
 });
+linkToNotification(modalSettings);
 
 initializeDefaultGameState();
 
