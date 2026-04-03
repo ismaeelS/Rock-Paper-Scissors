@@ -144,6 +144,9 @@ button {
 
     font-size: 1.25rem;
     user-select: none;
+
+    /* on page load, start it hidden */
+    visibility: hidden;
 }
 
 /* https://www.letsbuildui.dev/articles/how-to-animate-borders-in-css/ */
@@ -175,6 +178,10 @@ button {
 
 .autoplay-btn:hover {
     background-color: #696969;
+}
+
+.game-summary-and-reset-score {
+    visibility: hidden;
 }
 
 .results-text, .score-text {

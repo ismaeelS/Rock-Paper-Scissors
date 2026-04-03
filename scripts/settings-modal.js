@@ -1,33 +1,33 @@
 import { assignValuesToObject, checkIfObjectValuesAreTheSame } from "./utils/object-helpers.js";
 import { showNotification } from "./notification.js";
 
-let modalWeapons;
-let modalSettings;
-let modalScore;
+let score;
 let settings;
 let weapons;
-let score;
-let defaultWeapons;
+let modalScore;
+let modalSettings;
+let modalWeapons;
 let defaultSettings;
-let settingsModalIsOpen = false;
+let defaultWeapons;
+let updateScoreboard;
+let updateButtonHolder;
 let generateDefaultWeaponsHTML;
 let setupWeaponButtonListeners;
-let updateButtonHolder;
-let updateScoreboard;
+let settingsModalIsOpen = false;
 
-export function initModal(deps) {
-    modalWeapons = deps.modalWeapons;
-    modalSettings = deps.modalSettings;
-    modalScore = deps.modalScore;
-    settings = deps.settings;
-    weapons = deps.weapons;
-    score = deps.score;
-    defaultWeapons = deps.defaultWeapons;
-    defaultSettings = deps.defaultSettings;
-    generateDefaultWeaponsHTML = deps.generateDefaultWeaponsHTML;
-    setupWeaponButtonListeners = deps.setupWeaponButtonListeners;
-    updateButtonHolder = deps.updateButtonHolder;
-    updateScoreboard = deps.updateScoreboard;
+export function linkToModal(referenceFromMain) {
+    score = referenceFromMain.score;
+    settings = referenceFromMain.settings;
+    weapons = referenceFromMain.weapons;
+    modalScore = referenceFromMain.modalScore;
+    modalSettings = referenceFromMain.modalSettings;
+    modalWeapons = referenceFromMain.modalWeapons;
+    defaultSettings = referenceFromMain.defaultSettings;
+    defaultWeapons = referenceFromMain.defaultWeapons;
+    updateScoreboard = referenceFromMain.updateScoreboard;
+    updateButtonHolder = referenceFromMain.updateButtonHolder;
+    generateDefaultWeaponsHTML = referenceFromMain.generateDefaultWeaponsHTML;
+    setupWeaponButtonListeners = referenceFromMain.setupWeaponButtonListeners;
 }
 
 export function isSettingsModalOpen() {
@@ -170,7 +170,6 @@ export function openSettingsModal() {
     settingsModalIsOpen = true;
 }
 
-//ideally would have a check if there are unsaved values before allowing the modal to close
 export function closeSettingsModal() {
     modalContainerEle.classList.add("out");
 

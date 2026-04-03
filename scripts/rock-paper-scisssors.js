@@ -1,46 +1,12 @@
-import { settings } from "../data/settings.js";
-import { weapons } from "../data/weapons.js";
-import { imageNames } from "../data/imageNames.js";
+import { settings, defaultSettings } from "./data/settings.js";
+import { weapons, defaultWeapons } from "./data/weapons.js";
+import { imageNames } from "./data/imageNames.js";
 
 import { assignValuesToObject } from "./utils/object-helpers.js";
-import { showNotification, initNotifications } from "./notification.js";
-import { initModal, isSettingsModalOpen, openSettingsModal, closeSettingsModal, updateSettingsModal, addWeaponToSettings, undoSettingsChanges, restoreDefaultSettings, uploadFile, saveFile, loadPresets, submitNewSettings } from "./settings-modal.js";
-
-const defaultWeapons = {
-    rock: {
-        beats: ["scissors"],
-        ties: [],
-        shortcut: "r",
-    },
-    paper: {
-        beats: ["rock"],
-        ties: [],
-        shortcut: "p",
-    },
-    scissors: {
-        beats: ["paper"],
-        ties: [],
-        shortcut: "s",
-    },
-};
-
-const defaultSettings = {
-    autoplayInterval: 2000,
-    shortcuts: ["?", "a"],
-    askBeforeRemove: true,
-    showWarnings: false,
-};
+import { linkToNotification, showNotification } from "./notification.js";
+import { linkToModal, isSettingsModalOpen, openSettingsModal, closeSettingsModal, updateSettingsModal, addWeaponToSettings, undoSettingsChanges, restoreDefaultSettings, uploadFile, saveFile, loadPresets, submitNewSettings } from "./settings-modal.js";
 
 const score = {};
-
-// import values from local storage if available or initialize with defaults
-assignValuesToObject(score, JSON.parse(localStorage.getItem("score")), {
-    wins: 0,
-    losses: 0,
-    ties: 0,
-});
-assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
-assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
 
 const modalWeapons = {};
 const modalSettings = {};
@@ -53,8 +19,16 @@ const pageTitle = document.querySelector(".js-page-title");
 const resultsParagraph = document.querySelector(".js-results-text");
 const winRateParagraph = document.querySelector(".js-win-rate");
 
-initNotifications(modalSettings);
-initModal({
+// import values from local storage if available or initialize with defaults
+assignValuesToObject(score, JSON.parse(localStorage.getItem("score")), {
+    wins: 0,
+    losses: 0,
+    ties: 0,
+});
+assignValuesToObject(settings, JSON.parse(localStorage.getItem("settings")), defaultSettings);
+assignValuesToObject(weapons, JSON.parse(localStorage.getItem("weapons")), defaultWeapons);
+
+linkToModal({
     modalWeapons,
     modalSettings,
     modalScore,
@@ -68,6 +42,7 @@ initModal({
     updateButtonHolder,
     updateScoreboard,
 });
+linkToNotification(modalSettings);
 
 initializeDefaultGameState();
 
@@ -151,10 +126,10 @@ function initializeDefaultGameState() {
     document.querySelector(".js-autoplay-btn").addEventListener("click", () => {autoplayGame();});
     document.querySelector(".js-autoplay-btn").addEventListener("mouseenter", (e) => {
         if(!autoplaying) {
-            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves", e.target);
+            showNotification("warning", "While Autoplaying, You Will No Longer Be Able to Select Your Moves");
         }
         else {
-            showNotification("info", "Click Autoplay Again to End Autoplay", e.target);
+            showNotification("info", "Click Autoplay Again to End Autoplay");
         }
     });
     document.querySelector(".js-reset-score-btn").addEventListener("click", () => {
@@ -168,6 +143,8 @@ function initializeDefaultGameState() {
     document.querySelector(".js-reset-score-btn").addEventListener("mouseenter", (e) => {
         showNotification("warning", "All Score Data Will Be Reset. Buttons Will Not Be Affected", e.target, 5);
     });
+
+    document.querySelector(".js-autoplay-btn").style.visibility = "visible";
 
     setupWeaponButtonListeners();
 
