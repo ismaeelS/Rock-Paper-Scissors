@@ -49,13 +49,6 @@ initializeDefaultGameState();
 function initializeDefaultGameState() {
     generateDefaultWeaponsHTML();
 
-    //add rock paper scissors into default settings for when user wants to restore default
-    Object.keys(weapons).forEach((weapon) => {
-        if (weapons[weapon]["shortcut"]) {
-            defaultSettings.shortcuts.push(weapons[weapon]["shortcut"]);
-        }
-    });
-
     //set up listeners for the settings modal, the autoplay button, and the reset button
     document.querySelector(".js-gear-icon").addEventListener("click", (e) => {
         e.target.classList.add("keep-rotating");
@@ -290,8 +283,6 @@ function updateScoreboard() {
     //reset the colors if the score has been reset
     if (!roundsPlayed) resetColors();
 
-    updateButtonHolder();
-
     assignValuesToObject(modalScore, score);
 }
 
@@ -412,7 +403,6 @@ function resetScore() {
 
 /**
  *
- * @param {boolean} resetTitleAndButtonBorders
  * for each element, remove the css classes for border/text colors
  */
 function resetColors() {

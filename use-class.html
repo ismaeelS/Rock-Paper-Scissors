@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <meta name="description" content="Play Rock, Paper, Scissors between you and the computer. You can add additional choices, select an option at random, and autoplay the game.">
+        <meta name="author" content="">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta name="googlebot-news" content="index, follow, max-snippet:-1">
+        <meta property="og:title" content="Rock Paper Scissors Single Player Game"/>
+        <meta property="og:description" content="Play Rock, Paper, Scissors between you and the computer. You can add additional choices, select an option at random, and autoplay the game."/>
+
+        <title>Rock Paper Scissors+</title>
+        <link rel="stylesheet" href="styles/rock-paper-scissors.css">
+        <link rel="stylesheet" href="styles/modal.css">
+        <link rel="stylesheet" href="styles/notification.css">
+    </head>
+    <body>
+        <div class="preload-images"></div>
+        <div class="js-gear-icon gear-icon">&#9881;</div>
+
+        <div class="notification-container-wrapper">
+            <div class="notification-container"></div>
+        </div>
+
+        <section id="modal-container">
+            <section class="modal-background">
+                <div class="modal-content">
+                    <h1>Settings</h1>
+                    <button class="js-close-btn close-btn" id="close">X</button>
+                    <form class="modal-form">
+                        <h2>General</h2>
+                        <div class="general-settings-wrapper">
+                            <div class="general-setting">
+                                <label for="autoplay-interval">Autoplay Interval in Seconds</label>
+                                <input type="number" name="autoplay-interval" id="autoplay-interval" min="0" max="10">
+                            </div>
+                            <div class="general-setting">
+                                <label for="ask-before-remove">Ask Before Before Removing Buttons</label>
+                                <input type="checkbox" name="ask-before-remove" id="ask-before-remove" checked>
+                            </div>
+                            <div class="general-setting">
+                                <label for="show-warnings">Show Warnings</label>
+                                <input type="checkbox" name="show-warnings" id="show-warnings">
+                            </div>
+                        </div>
+                        
+                        <h2>Buttons</h2>
+                        <p>To unselect the last selected option on Mac, ⌘ + click. On PC, Ctrl + click</p>
+                        <div class="add-btn-wrapper">
+                            <button type="button" class="js-add-btn add-btn">Add New Button</button>
+                        </div>
+                        <div class="button-settings"></div>
+                        <div class="undo-and-restore-wrapper">
+                            <button type="button" class="js-settings-undo-btn undo-restore-btn">
+                                Undo Recent Edits
+                            </button>
+                            <button type="button" class="js-settings-restore-btn undo-restore-btn">
+                                Reset Settings
+                            </button>
+                            <button type="button" class="js-modal-reset-score-btn undo-restore-btn">Reset Score</button>
+                            <button type="button" class="js-reset-all-btn undo-restore-btn">
+                                Reset All
+                            </button>
+                        </div>
+                        <div class="file-btns-wrapper">
+                            <button type="button" class="file-btn upload-btn">
+                                <label for="file-input" class="file-input">Upload File</label>
+                            </button>
+                            <input type="file" id="file-input" accept="application/JSON">
+                            <button type="button" class="file-btn save-btn">Save to File</button>
+                        </div>
+                        <div class="preset-submit-btn-wrapper">
+                            <button type="button" class="js-presets-btn presets-btn">Load Presets</button>
+                            <button type="button" class="js-submit-btn submit-btn">Submit Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </section>
+
+        <p class="js-page-title page-title">Rock Paper Scissors<span class="js-plus-btn plus-btn">+</span></p>
+
+        <div class="js-button-holder button-holder"></div>
+        
+        <button class="js-autoplay-btn autoplay-btn">Autoplay</button>
+ 
+        <div class="js-game-summary-and-reset-score game-summary-and-reset-score">
+            <div class="js-results-text results-text">
+                <p class="js-round-picks"></p>
+                <p class="js-round-result"></p>
+            </div>
+
+            <div class="score-text">
+                <p class="js-scoreboard scoreboard"></p>
+                <p class="js-win-rate"></p>
+            </div>
+
+            <div class="js-reset-score-btn-wrapper">
+                <button class="js-reset-score-btn reset-score-btn">Reset Score</button>
+            </div>
+        </div>
+        
+        <!-- <script type="module" src="scripts/rock-paper-scisssors.js"></script> -->
+         <script src="button-class.js"></script>
+         <script type="module" src="use-class-rps.js"></script>
+    </body>
+</html>

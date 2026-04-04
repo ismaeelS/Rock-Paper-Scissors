@@ -1,5 +1,5 @@
 export const weapons = {
-}
+};
 
 export const defaultWeapons = {
     rock: {
