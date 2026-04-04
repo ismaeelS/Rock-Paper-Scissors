@@ -241,6 +241,8 @@ function formatWeaponName(attemptedWeaponName) {
     //if only numbers are given, set the name
     if (!isNaN(attemptedWeaponName)) attemptedWeaponName = "beepboop";
 
+    if (attemptedWeaponName === "random") attemptedWeaponName = "randomer";
+
     return attemptedWeaponName;
 }
 
