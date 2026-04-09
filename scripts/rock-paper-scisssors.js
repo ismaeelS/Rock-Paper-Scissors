@@ -6,6 +6,8 @@ import { assignValuesToObject } from "./utils/object-helpers.js";
 import { linkToNotification, showNotification } from "./notification.js";
 import { linkToModal, isSettingsModalOpen, openSettingsModal, closeSettingsModal, updateSettingsModal, addWeaponToSettings, undoSettingsChanges, restoreDefaultSettings, uploadFile, saveFile, loadPresets, submitNewSettings } from "./settings-modal.js";
 
+import "./data/backend-kindof.js";
+
 const score = {};
 
 const modalWeapons = {};
