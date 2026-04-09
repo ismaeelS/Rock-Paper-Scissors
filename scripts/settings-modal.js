@@ -34,6 +34,17 @@ export function isSettingsModalOpen() {
     return settingsModalIsOpen;
 }
 
+document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
+    modalSettings.askBeforeRemove = e.target.checked;
+
+    showNotification("info", "Setting In Effect, But Not Saved");
+});
+document.querySelector("#show-warnings").addEventListener("change", (e) => {
+    modalSettings.showWarnings = e.target.checked;
+
+    showNotification("info", "Setting In Effect, But Not Saved");
+});
+
 /**
  * set up input, input values, etc (unneccessary if using a framework)
  */
@@ -88,8 +99,6 @@ export function updateSettingsModal() {
 
     //scroll to the most recently created button when modal is updated
     document.querySelector(".button-settings").lastElementChild.scrollIntoView();
-
-    //ideally the dropdown options would update when a new weapon is added
 }
 
 function createModalDropdownOptionsHTML(chosenWeapon, comparison) {
@@ -140,20 +149,8 @@ function setUpRemoveButtonListener(removeButton) {
     });
 }
 
-const modalContainerEle = document.querySelector("#modal-container");
-
-document.querySelector("#ask-before-remove").addEventListener("change", (e) => {
-    modalSettings.askBeforeRemove = e.target.checked;
-
-    showNotification("info", "Setting In Effect, But Not Saved");
-});
-document.querySelector("#show-warnings").addEventListener("change", (e) => {
-    modalSettings.showWarnings = e.target.checked;
-
-    showNotification("info", "Setting In Effect, But Not Saved");
-});
-
 export function openSettingsModal() {
+    const modalContainerEle = document.querySelector("#modal-container");
     modalContainerEle.removeAttribute("class");
     modalContainerEle.classList.add("fold-animation");
 
@@ -162,16 +159,14 @@ export function openSettingsModal() {
     //clear any existing file
     document.querySelector("#file-input").value = null;
 
-    //scroll to the most recently created button when settings is opened
-    document.querySelector(".button-settings").lastElementChild.scrollIntoView();
-
     //allow the user to see all buttons in the background
     document.querySelector(".js-button-holder").classList.remove("restrict-button-holder");
+
     settingsModalIsOpen = true;
 }
 
 export function closeSettingsModal() {
-    modalContainerEle.classList.add("out");
+    document.querySelector("#modal-container").classList.add("out");
 
     if (!checkIfObjectValuesAreTheSame(modalSettings, settings) || !checkIfObjectValuesAreTheSame(modalWeapons, weapons)) {
         showNotification("info", "Button Edits Not Saved. Please Click Submit to Save Changes");
@@ -247,25 +242,27 @@ function formatWeaponName(attemptedWeaponName) {
 }
 
 export function undoSettingsChanges() {
-    //the reset button type resets the autoplay interval also so the timeout restores it
+    const autoplayIntervalWasChanged = (document.querySelector("#autoplay-interval").value)*1000 !== modalSettings.autoplayInterval;
+
     setTimeout(function() {
         document.querySelector("#autoplay-interval").value = (modalSettings.autoplayInterval)/1000;
     }, 0);
 
-    if (!checkIfObjectValuesAreTheSame(modalWeapons, weapons) || !checkIfObjectValuesAreTheSame(modalSettings, settings)) {
-        assignValuesToObject(modalWeapons, weapons);
+    if (!checkIfObjectValuesAreTheSame(modalSettings, settings) || !checkIfObjectValuesAreTheSame(modalWeapons, weapons)) {
         assignValuesToObject(modalSettings, settings);
+        assignValuesToObject(modalWeapons, weapons);
 
         updateSettingsModal();
 
-        showNotification("success", "Recent Edits Have Been Reversed");
+        return true;
     }
+    return autoplayIntervalWasChanged;
 }
 
 export function restoreDefaultSettings() {
-    if (!checkIfObjectValuesAreTheSame(modalWeapons, defaultWeapons) || !checkIfObjectValuesAreTheSame(modalSettings, defaultSettings)) {
-        assignValuesToObject(weapons, defaultWeapons);
+    if (!checkIfObjectValuesAreTheSame(modalSettings, defaultSettings) || !checkIfObjectValuesAreTheSame(modalWeapons, defaultWeapons)) {
         assignValuesToObject(settings, defaultSettings);
+        assignValuesToObject(weapons, defaultWeapons);
 
         localStorage.removeItem("settings");
         localStorage.removeItem("weapons");
@@ -273,7 +270,7 @@ export function restoreDefaultSettings() {
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();
         updateSettingsModal();
-
+        
         return true;
     }
     return false;
@@ -642,13 +639,13 @@ export function submitNewSettings(autoplaying, autoplayGame) {
     const errorMessage = weaponsHaveConflicts(modalWeapons);
 
     if (!errorMessage) {
-        const settingsAreDifferent = !checkIfObjectValuesAreTheSame(weapons, modalWeapons) || !checkIfObjectValuesAreTheSame(settings, modalSettings) || !checkIfObjectValuesAreTheSame(score, modalScore);
+        const settingsAreDifferent = !checkIfObjectValuesAreTheSame(score, modalScore) || !checkIfObjectValuesAreTheSame(settings, modalSettings) || !checkIfObjectValuesAreTheSame(weapons, modalWeapons);
 
         const autoplayIntervalWasChanged = settings.autoplayInterval !== modalSettings.autoplayInterval;
 
-        assignValuesToObject(weapons, modalWeapons);
-        assignValuesToObject(settings, modalSettings);
         assignValuesToObject(score, modalScore);
+        assignValuesToObject(settings, modalSettings);
+        assignValuesToObject(weapons, modalWeapons);
 
         generateDefaultWeaponsHTML();
         setupWeaponButtonListeners();

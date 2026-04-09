@@ -69,7 +69,14 @@ function initializeDefaultGameState() {
 
     document.querySelector(".js-add-btn").addEventListener("click", () => {addWeaponToSettings();});
 
-    document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {undoSettingsChanges();});
+    document.querySelector(".js-settings-undo-btn").addEventListener("click", () => {
+        if (undoSettingsChanges()) {
+            showNotification("success", "Recent Edits Have Been Reversed");
+        }
+        else {
+            showNotification("info", "There are no Unsaved Edits to Undo");
+        }
+    });
     document.querySelector(".js-modal-reset-score-btn").addEventListener("click", () => {
         if (resetScore()) {
             showNotification("success", "Score Has Been Reset");

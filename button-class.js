@@ -24,8 +24,6 @@ class Button {
     }
 
     #asHTML() {
-        // console.log(`<button class="js-random-btn move-btn" data-button-name="random">random</button>`);
-        // console.log(`<button class="js-${this.name}-btn move-btn" data-button-name="${this.name}">${this.name}</button>`);
         return `<button class="js-${this.name}-btn move-btn" data-button-name="${this.name}">${this.name}</button>`;
     }
 
@@ -51,19 +49,19 @@ class Button {
         });
 
         this.webElement.addEventListener("mouseover", () => {
-            if(!isAutoplaying()) this.setButtonBackground();
+            if(!isAutoplaying()) this.showBackground();
         });
 
         this.webElement.addEventListener("mouseout", () => {
-            if(!isAutoplaying()) this.clearButtonBackground();
+            if(!isAutoplaying()) this.hideBackground();
         });
     }
 
-    setButtonBackground() {
+    showBackground() {
         this.webElement.style.backgroundImage = `url("images/${this.buttonsWithImages.includes(this.name) ? this.name : "unknown"}.jpg")`;
     }
 
-    clearButtonBackground() {
+    hideBackground() {
         this.webElement.style.backgroundImage = "";
     }
 

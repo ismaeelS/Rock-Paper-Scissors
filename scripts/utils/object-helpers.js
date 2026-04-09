@@ -55,7 +55,8 @@ export function checkIfObjectValuesAreTheSame(objA, objB) {
 
     for (const key of Object.keys(objA)) {
         //ignore the button key and value
-        if (key === "button") {
+        //HALP change the button member element to webElement
+        if (key === "button" || key === "webElement") {
             continue;
         }
         if (!checkIfObjectValuesAreTheSame(objA[key], objB[key])) return false;
