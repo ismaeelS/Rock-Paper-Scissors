@@ -44,8 +44,8 @@ export function checkIfObjectValuesAreTheSame(objA, objB) {
     }
 
     //ignore the button key
-    const keys1 = String(Object.keys(objA).filter(key => key !== "button"));
-    const keys2 = String(Object.keys(objB).filter(key => key !== "button"));
+    const keys1 = String(Object.keys(objA).filter(key => key !== "webElement"));
+    const keys2 = String(Object.keys(objB).filter(key => key !== "webElement"));
 
     //if the keys are either not matching or if they are matching but in a different order
     //handles the case when still default buttons but user has changed order
@@ -55,8 +55,7 @@ export function checkIfObjectValuesAreTheSame(objA, objB) {
 
     for (const key of Object.keys(objA)) {
         //ignore the button key and value
-        //HALP change the button member element to webElement
-        if (key === "button" || key === "webElement") {
+        if (key === "webElement") {
             continue;
         }
         if (!checkIfObjectValuesAreTheSame(objA[key], objB[key])) return false;

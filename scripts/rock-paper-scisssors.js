@@ -118,9 +118,6 @@ function initializeDefaultGameState() {
     });
 
     document.querySelector(".upload-btn").addEventListener("click", () => {uploadFile()});
-    document.querySelector(".upload-btn").addEventListener("mouseenter", (e) => {
-        showNotification("warning", "The File Will Attempt to Overwrite Current Settings. This Cannot Be Undone", e.target);
-    });
     document.querySelector(".save-btn").addEventListener("click", () => {saveFile()});
     document.querySelector(".js-presets-btn").addEventListener("click", () => {loadPresets()});
     document.querySelector(".js-submit-btn").addEventListener("click", () => {submitNewSettings(autoplaying, autoplayGame);});
@@ -180,7 +177,7 @@ function setupWeaponButtonListeners() {
     Object.keys(weapons).forEach(weapon => {
         //find the corresponding button and assign it to the weapons object
         const currentWeaponButton = document.querySelector(`.js-${weapon}-btn`);
-        weapons[weapon]["button"] = currentWeaponButton;
+        weapons[weapon]["webElement"] = currentWeaponButton;
 
         //add event listeners to play the weapon and to toggle the weapon background
         currentWeaponButton.addEventListener("click", () => {if(!autoplaying) playOneRound(weapon)});
@@ -239,7 +236,7 @@ function setupWeaponButtonListeners() {
     assignValuesToObject(modalWeapons, weapons);
 
     Object.keys(weapons).forEach(weapon => {
-        modalWeapons[weapon]["button"] = weapons[weapon]["button"];
+        modalWeapons[weapon]["webElement"] = weapons[weapon]["webElement"];
     });
 
     //assign modal settings to include the current settings
@@ -319,7 +316,7 @@ function autoplayGame() {
     }
     else {
         Object.keys(weapons).forEach(weapon => {
-            setButtonBackground(weapons[weapon]["button"], weapon, true);
+            setButtonBackground(weapons[weapon]["webElement"], weapon, true);
         });
 
         clearInterval(intervalId);
@@ -330,14 +327,14 @@ function autoplayGame() {
 
 function playOneRandomRound() {
     Object.keys(weapons).forEach(weapon => {
-        setButtonBackground(weapons[weapon]["button"], weapon, true);
+        setButtonBackground(weapons[weapon]["webElement"], weapon, true);
     });
 
     const bothWeapons = playOneRound(chooseRandomWeapon());
 
     //show the weapon background when it is picked during autoplay
     bothWeapons.forEach(weapon => {
-        setButtonBackground(weapons[weapon]["button"], weapon);
+        setButtonBackground(weapons[weapon]["webElement"], weapon);
     });
 }
 
@@ -358,7 +355,7 @@ function playOneRound(selectedPlayerWeapon) {
 
         pageTitle.classList.add("turn-text-green");
         resultsParagraph.classList.add("turn-text-green");
-        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-green");
+        weapons[selectedPlayerWeapon]["webElement"].classList.add("turn-border-green");
     }
     else {
         roundResultMessage = "You Lose"
@@ -366,7 +363,7 @@ function playOneRound(selectedPlayerWeapon) {
 
         pageTitle.classList.add("turn-text-red");
         resultsParagraph.classList.add("turn-text-red");
-        weapons[selectedPlayerWeapon]["button"].classList.add("turn-border-red");
+        weapons[selectedPlayerWeapon]["webElement"].classList.add("turn-border-red");
     }
 
     document.querySelector(".js-round-picks").innerHTML =
@@ -423,7 +420,7 @@ function resetColors() {
 
     Object.keys(weapons).forEach(weapon => {
         ["green", "red"].forEach(color => {
-            weapons[weapon]["button"].classList.remove(`turn-border-${color}`);
+            weapons[weapon]["webElement"].classList.remove(`turn-border-${color}`);
         });
     });
 }

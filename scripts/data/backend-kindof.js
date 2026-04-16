@@ -115,12 +115,44 @@ postGreetings();
 
 /*
 async function fetchBezos() {
+    const url = "https://amazon.com";
     try {
-        const response = await fetch("https://amazon.com");
+        const response = await fetch(url);
     } catch (error) {
         console.log(":(", error);
     }
 }
 
 fetchBezos();
+//*/
+
+/*
+// POST with async await but no body 400 error
+async function postGreetingsNoBody() {
+    try {
+        const response = await fetch("https://supersimplebackend.dev/greeting", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    
+        if (response.status >= 400) {
+            throw response;
+        }
+
+        const greeting = await response.text();
+        console.log(greeting);
+    } catch (error) {
+        if (error.status === 400) {
+            const errorResponse = await error.json();
+            console.log(errorResponse);
+        }
+        else {
+            console.log("Network error");
+        }
+    }
+}
+
+postGreetingsNoBody();
 //*/

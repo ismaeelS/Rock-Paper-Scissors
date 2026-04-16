@@ -286,10 +286,10 @@ export function uploadFile() {
 }
 
 async function checkAndUseFile(event) {
-    const file = event.target.files.item(0)
+    const file = event.target.files.item(0);
     const text = await file.text();
 
-    fileData = JSON.parse(text);
+    const fileData = JSON.parse(text);
 
     const fileError = validateInputFile(fileData);
 
@@ -316,8 +316,8 @@ async function checkAndUseFile(event) {
     document.querySelector("#file-input").value = null;
 }
 
-//HALP THIS FUNCTION NEEDS TO BE CLEANED UP WITH A LOT OF THE HEAVY LIFTING NOT HAVING TO BE DONE HERE BECAUSE THE MODAL HAS CHECKS ON SUBMIT
-function validateInputFile(fileData) {
+//HALP ADD SOME JASMINE TESTS FOR THIS FUNCTION
+export function validateInputFile(fileData) {
     if (fileData === "") {
         return "File is empty"
     }
@@ -325,19 +325,32 @@ function validateInputFile(fileData) {
     const fileDataKeys = Object.keys(fileData);
     const gameKeys = ["score", "settings", "weapons"];
 
-    let numberOfMissingGameKeys = 0;
-
     for (let i = 0; i < gameKeys.length; i++) {
         const currentGameKey = gameKeys[i];
-
+        
         if (!fileDataKeys.includes(currentGameKey)) {
-            fileData[currentGameKey] = {};
-            numberOfMissingGameKeys++;
+            return `This file does not contain data for ${currentGameKey}`;
         }
     }
+    
+    //score validation
+    const fileDataScoreKeys = Object.keys(fileData["score"]);
+    const scoreKeys = Object.keys(score);
 
-    if (numberOfMissingGameKeys === gameKeys.length) {
-        return `This file does not contain any of the following as base keys: ${gameKeys}`
+    for (let i = 0; i < scoreKeys.length; i++) {
+        const currentScoreKey = scoreKeys[i];
+
+        if (!fileDataScoreKeys.includes(currentScoreKey)) {
+            return `This file's score must contain wins, ties and losses but is missing ${currentScoreKey}`
+        }
+
+        if (typeof fileData["score"][currentScoreKey] !== "number") {
+            return `All score values need to be numbers ${currentScoreKey}'s value is not a number`;
+        }
+
+        if (fileData["score"][currentScoreKey] < 0) {
+            return `${currentScoreKey}'s value cannot be negative`
+        }
     }
 
     //settings validation
@@ -348,60 +361,55 @@ function validateInputFile(fileData) {
         const currentSettingsKey = settingsKeys[i];
 
         if (!fileDataSettingsKeys.includes(currentSettingsKey)) {
-            fileData["settings"][currentSettingsKey] = null;
+            return `This file's settings is missing ${currentSettingsKey}`;
         }
     }
 
-    if (!fileData["settings"]["askBeforeRemove"]) {
-        fileData["settings"]["askBeforeRemove"] = true;
+    if (typeof fileData["settings"]["autoplayInterval"] !== "number") {
+        return `The value of autoplayInterval must be a number`;
     }
+
+    if (fileData.settings["autoplayInterval"] < 0 || fileData.settings["autoplayInterval"] > 10000) {
+        return `Thee value of autoplayInterval must be between 0 and 10,000`
+    }
+
+    const fileDataSettingsShortcuts = fileData["settings"]["shortcuts"];
+
+    //code pivots here and fixes the errors instead of notifying
+    const fileDataSettingsShortcutsCleaned = [];
+
+    for (let i = 0; i < fileDataSettingsShortcuts.length; i++) {
+        const currentSettingsShortcut = fileDataSettingsShortcuts[i];
+
+        if (!fileDataSettingsShortcutsCleaned.includes(currentSettingsShortcut)) {
+            if (currentSettingsShortcut === "?") {
+                fileDataSettingsShortcutsCleaned.push(currentSettingsShortcut);
+            }
+            //only adds letters
+            else if (currentSettingsShortcut.toLowerCase() !== currentSettingsShortcut.toUpperCase()) {
+                fileDataSettingsShortcutsCleaned.push(currentSettingsShortcut.toLowerCase());
+            }
+        }        
+    }
+    
+    if (!fileDataSettingsShortcutsCleaned.includes("?")) {
+        return `Settings shortcuts must include ?`;
+    }
+    
+    if (!fileDataSettingsShortcutsCleaned.includes("a")) {
+        return `Settings shortcuts must include a`;
+    }
+    
+    fileData["settings"]["shortcuts"] = fileDataSettingsShortcutsCleaned;
 
     if (typeof fileData["settings"]["askBeforeRemove"] !== "boolean") {
-        fileData["settings"]["askBeforeRemove"] = true;
+        return `The value of askBeforeRemove must be a boolean`;
     }
-
-    if (!fileData["settings"]["autoplayInterval"]) {
-        fileData["settings"]["autoplayInterval"] = 2000;
-    }
-
-    if (typeof fileData["settings"]["autoplayInterval"] !== "number" || fileData.settings["autoplayInterval"] < 0 || fileData.settings["autoplayInterval"] > 10000) {
-        fileData["settings"]["autoplayInterval"] = 2000;
-    }
-
-    if (!fileData["settings"]["shortcuts"]) {
-        fileData["settings"]["shortcuts"] = ["?", "a"];
-    }
-
-    //shortcuts handled with weapons later
-
-    if (!fileData["settings"]["showWarnings"]) {
-        fileData["settings"]["showWarnings"] = true;
-    }
-
+    
     if (typeof fileData["settings"]["showWarnings"] !== "boolean") {
-        fileData["settings"]["showWarnings"] = true;
+        return `The value of showWarnings must be a boolean`;
     }
-
-
-    //score validation
-    const fileDataScoreKeys = Object.keys(fileData["score"]);
-    const scoreKeys = Object.keys(score);
-
-    for (let i = 0; i < scoreKeys.length; i++) {
-        const currentScoreKey = scoreKeys[i];
-
-        if (!fileDataScoreKeys.includes(currentScoreKey)) {
-            fileData["score"][currentScoreKey] = 0;
-        }
-
-        if (typeof fileData["score"][currentScoreKey] !== "number") {
-            return `All score values need to be numbers ${currentScoreKey} is not a number`;
-        }
-
-        if (fileData["score"][currentScoreKey] < 0) {
-            return `${fileData["score"][currentScoreKey]} cannot be negative`
-        }
-    }
+    //HALP CONTINUE FROM HERE
 
     //weapon validation and settings shortcuts from weapons
     const fileDataWeapons = Object.keys(fileData["weapons"]);
@@ -418,6 +426,7 @@ function validateInputFile(fileData) {
     for (let i = 0; i < fileDataWeapons.length; i++) {
         const currentWeapon = fileDataWeapons[i];
 
+        //create the ties and beats array for this weapon if they dont exist
         if (!fileData["weapons"][currentWeapon]["beats"]) {
             fileData["weapons"][currentWeapon]["beats"] = [];
         }
@@ -439,7 +448,9 @@ function validateInputFile(fileData) {
 
     const fileWeaponsShortcuts = ["?", "a"];
 
-    Object.keys(fileData["weapons"]).forEach((weaponToCheck) => {
+    for (let i = 0; i < fileDataWeapons.length; i++) {
+        const weaponToCheck = fileDataWeapons[i];
+        
         //if current key is the misnamed weapon, replace the whole key
         if (Object.keys(weaponsExchange).includes(weaponToCheck)) {
             fileData["weapons"][weaponsExchange[weaponToCheck]] = fileData["weapons"][weaponToCheck];
@@ -459,14 +470,59 @@ function validateInputFile(fileData) {
             }
         });
 
-        //if shorcut exists, is a letter, 1 char, and not already added
-        if (fileData["weapons"]["shortcut"] &&
-            (fileData["weapons"]["shortcut"].toLowerCase() !== fileData["weapons"]["shortcut"]).toUpperCase() &&
-            fileData["weapons"]["shortcut"].length === 1 &&!fileWeaponsShortcuts.includes(fileData["weapons"]["shortcut"])) {
-            fileWeaponsShortcuts.push(fileData["weapons"]["shortcut"]);
-        }
-    });
+        const weaponToCheckShortcut = fileData["weapons"][weaponToCheck]["shortcut"];
 
+        if (weaponToCheckShortcut) {
+            if (weaponToCheckShortcut === 'a' || weaponToCheckShortcut === '?') {
+                return `${weaponToCheck}'s shortcut is ${weaponToCheckShortcut} but button shortcuts cannot be "?" or "a"`;
+            }
+    
+            if (weaponToCheckShortcut.toLowerCase() === weaponToCheckShortcut.toUpperCase()) {
+                return `${weaponToCheck}'s shortcut is ${weaponToCheckShortcut} but it must be a letter`;
+            }
+    
+            if (weaponToCheckShortcut.length !== 1) {
+                return `${weaponToCheck}'s shortcut must be exactly one letter in length`;
+            }
+
+            if (fileWeaponsShortcuts.includes(weaponToCheckShortcut)) {
+                return `${weaponToCheck}'s shortcut is ${weaponToCheckShortcut} but another button already uses that shortcut`;
+            }
+
+            fileWeaponsShortcuts.push(weaponToCheckShortcut);
+        }   
+    }
+
+    //notify the user if there are any shortcuts from the settings shortcut array that do not have a corresponding match to a weapon
+    if (JSON.stringify(fileDataSettingsShortcutsCleaned.toSorted()) !== JSON.stringify(fileWeaponsShortcuts.toSorted())) {
+        const unusedShortcutsFromSettings = [];
+        const unusedShortcutsFromWeapons = [];
+        
+        for (let i = 0; i < fileDataSettingsShortcutsCleaned.length; i++) {
+            const shortcutFromCleaned = fileDataSettingsShortcutsCleaned[i];
+            
+            if (!fileWeaponsShortcuts.includes(shortcutFromCleaned)) {
+                unusedShortcutsFromSettings.push(shortcutFromCleaned);
+            }
+        }
+        
+        for (let i = 0; i < fileWeaponsShortcuts.length; i++) {
+            const shortcutFromWeapon = fileWeaponsShortcuts[i];
+            
+            if (!fileDataSettingsShortcutsCleaned.includes(shortcutFromWeapon)) {
+                unusedShortcutsFromWeapons.push(shortcutFromWeapon);
+            }
+        }
+
+        
+        if (unusedShortcutsFromSettings.length > 0) {
+            showNotification("warning", `The following shortcuts were in the settings shortcuts but do not correspond to a weapon: ${unusedShortcutsFromSettings}`);
+        }
+        if (unusedShortcutsFromWeapons.length > 0) {
+            showNotification("warning", `The following shortcuts correspond to a weapon but were notfound in the settings shortcuts: ${unusedShortcutsFromWeapons}`);
+        }
+    }
+    
     fileData["settings"]["shortcuts"] = fileWeaponsShortcuts;
 
     const weaponConflict = weaponsHaveConflicts(fileData["weapons"]);
@@ -555,19 +611,19 @@ export function loadPresets() {
             case "1":
                 modalSettings.shortcuts = ["?","a","r","p","s","w"];
 
-                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","well"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper"],"ties":[],"shortcut":"s","button":{}},"well":{"beats":["rock","scissors"],"ties":[],"shortcut":"w","button":{}}});
+                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors"],"ties":[],"shortcut":"r","webElement":{}},"paper":{"beats":["rock","well"],"ties":[],"shortcut":"p","webElement":{}},"scissors":{"beats":["paper"],"ties":[],"shortcut":"s","webElement":{}},"well":{"beats":["rock","scissors"],"ties":[],"shortcut":"w","webElement":{}}});
 
                 break;
             case "2":
                 modalSettings.shortcuts = ["?","a","r","p","s","k","l"];
 
-                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors","lizard"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","spock"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","lizard"],"ties":[],"shortcut":"s","button":{}},"spock":{"beats":["rock","scissors"],"ties":[],"shortcut":"k","button":{}},"lizard":{"beats":["paper","spock"],"ties":[],"shortcut":"l","button":{}}});
+                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors","lizard"],"ties":[],"shortcut":"r","webElement":{}},"paper":{"beats":["rock","spock"],"ties":[],"shortcut":"p","webElement":{}},"scissors":{"beats":["paper","lizard"],"ties":[],"shortcut":"s","webElement":{}},"spock":{"beats":["rock","scissors"],"ties":[],"shortcut":"k","webElement":{}},"lizard":{"beats":["paper","spock"],"ties":[],"shortcut":"l","webElement":{}}});
 
                 break;
             case "3":
                 modalSettings.shortcuts = ["?","a","r","p","s","f","w"];
 
-                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors","water"],"ties":[],"shortcut":"r","button":{}},"paper":{"beats":["rock","water"],"ties":[],"shortcut":"p","button":{}},"scissors":{"beats":["paper","water"],"ties":[],"shortcut":"s","button":{}},"fire":{"beats":["rock","paper","scissors"],"ties":[],"shortcut":"f","button":{}},"water":{"beats":["fire"],"ties":[],"shortcut":"w","button":{}}});
+                assignValuesToObject(modalWeapons, {"rock":{"beats":["scissors","water"],"ties":[],"shortcut":"r","webElement":{}},"paper":{"beats":["rock","water"],"ties":[],"shortcut":"p","webElement":{}},"scissors":{"beats":["paper","water"],"ties":[],"shortcut":"s","webElement":{}},"fire":{"beats":["rock","paper","scissors"],"ties":[],"shortcut":"f","webElement":{}},"water":{"beats":["fire"],"ties":[],"shortcut":"w","webElement":{}}});
 
                 break;
             default:
@@ -664,7 +720,7 @@ export function submitNewSettings(autoplaying, autoplayGame) {
             showNotification ("info", "No Edits Have Been Made");
         }
 
-        //if the interval was changed while autoplaying, update the interval and restart autoplaying
+        //if the interval was changed while autoplaying, update the interval by stopping then restarting autoplaying
         if (autoplaying && autoplayIntervalWasChanged) {
             autoplayGame();
             autoplayGame();
